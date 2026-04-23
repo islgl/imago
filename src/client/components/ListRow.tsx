@@ -36,39 +36,39 @@ export function ListRow({
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        padding: '8px 12px',
-        borderRadius: 7,
+        padding: '7px 10px',
+        borderRadius: 'var(--r)',
         cursor: 'pointer',
         background: selected ? 'var(--accent-bg)' : hov ? 'var(--hover-bg)' : 'transparent',
-        transition: 'background .08s',
-        outline: selected ? '1px solid rgba(35,131,226,.25)' : 'none',
+        transition: 'background 0.08s',
+        outline: selected ? '1px solid oklch(0.56 0.22 263 / 22%)' : 'none',
+        outlineOffset: -1,
       }}
     >
+      {/* Thumbnail */}
       <div
         style={{
           width: 42,
           height: 32,
-          borderRadius: 5,
+          borderRadius: 'var(--r-sm)',
           overflow: 'hidden',
           flexShrink: 0,
-          background: '#eeede9',
+          background: 'oklch(0.93 0 0)',
           position: 'relative',
         }}
       >
         <img src={img.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(img.id);
-          }}
+          onClick={(e) => { e.stopPropagation(); onSelect(img.id); }}
           style={{
             position: 'absolute',
             inset: 0,
-            background: hov || selected ? 'rgba(0,0,0,.35)' : 'transparent',
+            background: hov || selected ? 'oklch(0 0 0 / 34%)' : 'transparent',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transition: 'all .12s',
+            transition: 'all 0.12s',
+            cursor: 'pointer',
           }}
         >
           {(hov || selected) && (
@@ -77,7 +77,7 @@ export function ListRow({
                 width: 16,
                 height: 16,
                 borderRadius: 4,
-                background: selected ? 'var(--accent)' : 'rgba(255,255,255,.88)',
+                background: selected ? 'var(--accent)' : 'oklch(1 0 0 / 90%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -89,8 +89,18 @@ export function ListRow({
         </div>
       </div>
 
+      {/* Name + meta */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 500,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            letterSpacing: '-0.01em',
+          }}
+        >
           {img.filename}
         </div>
         <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>
@@ -99,19 +109,22 @@ export function ListRow({
         </div>
       </div>
 
-      <div style={{ fontSize: 12, color: 'var(--text-3)', flexShrink: 0, width: 80, textAlign: 'right' }}>
+      {/* Date */}
+      <div style={{ fontSize: 11.5, color: 'var(--text-3)', flexShrink: 0, width: 80, textAlign: 'right' }}>
         {formatDate(img.createdAt)}
       </div>
 
-      <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
+      {/* Public badge */}
+      <div style={{ display: 'flex', gap: 5, flexShrink: 0, width: 56, justifyContent: 'center' }}>
         {img.isPublic && (
           <span
             style={{
-              fontSize: 11,
+              fontSize: 10.5,
               color: 'var(--text-2)',
-              background: 'var(--hover-bg)',
+              background: 'var(--active-bg)',
               padding: '2px 7px',
               borderRadius: 100,
+              letterSpacing: '0.01em',
             }}
           >
             Public
@@ -119,6 +132,7 @@ export function ListRow({
         )}
       </div>
 
+      {/* Copy button */}
       <button
         onClick={async (e) => {
           e.stopPropagation();
@@ -126,24 +140,22 @@ export function ListRow({
             await onCopy(img);
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
-          } catch {
-            /* noop */
-          }
+          } catch { /* noop */ }
         }}
         style={{
           padding: '4px 10px',
           fontSize: 11.5,
           fontWeight: 500,
           fontFamily: 'inherit',
-          background: copied ? 'rgba(15,123,108,.12)' : hov ? 'var(--active-bg)' : 'transparent',
+          background: copied ? 'oklch(0.52 0.13 160 / 12%)' : hov ? 'var(--active-bg)' : 'transparent',
           color: copied ? 'var(--success)' : 'var(--text-2)',
-          border: '1px solid ' + (hov ? 'var(--border-mid)' : 'transparent'),
-          borderRadius: 5,
+          border: '1px solid ' + (hov ? 'var(--border)' : 'transparent'),
+          borderRadius: 'var(--r-sm)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           gap: 5,
-          transition: 'all .12s',
+          transition: 'all 0.12s',
           flexShrink: 0,
           opacity: hov || copied ? 1 : 0,
         }}

@@ -24,106 +24,112 @@ export function SettingsPanel({
     {
       section: 'About',
       items: [
-        { label: 'Imago', desc: 'Cloudflare Workers + R2', value: 'v0.1.0 MVP' },
+        { label: 'Imago', desc: 'Cloudflare Workers + R2', value: 'v0.1.0' },
       ],
     },
   ];
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* TopBar-matching header */}
       <div
         style={{
-          height: 50,
+          height: 52,
           padding: '0 24px',
           borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
-          gap: 14,
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 14, fontWeight: 600 }}>Settings</span>
+        <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.02em' }}>Settings</span>
       </div>
-      <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px', maxWidth: 600 }}>
+
+      <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px', maxWidth: 580 }}>
+
+        {/* Account section */}
         <div style={{ marginBottom: 36 }}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: 'var(--text-3)',
-              letterSpacing: '.06em',
-              textTransform: 'uppercase',
-              marginBottom: 12,
-            }}
-          >
-            Account
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 0',
-              borderBottom: '1px solid var(--border)',
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 13.5, fontWeight: 500 }}>Session</div>
-              <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
-                Active for 7 days since login
-              </div>
-            </div>
-            <Btn variant="outline" size="sm" onClick={onLogout}>
-              Log out
-            </Btn>
-          </div>
+          <SectionLabel>Account</SectionLabel>
+          <SettingsRow
+            label="Session"
+            desc="Active for 7 days since login"
+            action={<Btn variant="outline" size="sm" onClick={onLogout}>Log out</Btn>}
+          />
         </div>
+
         {sections.map(({ section, items }) => (
           <div key={section} style={{ marginBottom: 36 }}>
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: 'var(--text-3)',
-                letterSpacing: '.06em',
-                textTransform: 'uppercase',
-                marginBottom: 12,
-              }}
-            >
-              {section}
-            </div>
+            <SectionLabel>{section}</SectionLabel>
             {items.map((item) => (
-              <div
+              <SettingsRow
                 key={item.label}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 0',
-                  borderBottom: '1px solid var(--border)',
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: 13.5, fontWeight: 500 }}>{item.label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{item.desc}</div>
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: 'var(--text-2)',
-                    background: 'var(--sidebar-bg)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 5,
-                    padding: '4px 10px',
-                  }}
-                >
-                  {item.value}
-                </div>
-              </div>
+                label={item.label}
+                desc={item.desc}
+                action={
+                  <div
+                    style={{
+                      fontSize: 12.5,
+                      color: 'var(--text-2)',
+                      background: 'var(--sidebar-bg)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--r-sm)',
+                      padding: '4px 10px',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {item.value}
+                  </div>
+                }
+              />
             ))}
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        fontSize: 10.5,
+        fontWeight: 600,
+        color: 'var(--text-3)',
+        letterSpacing: '0.07em',
+        textTransform: 'uppercase',
+        marginBottom: 12,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SettingsRow({
+  label,
+  desc,
+  action,
+}: {
+  label: string;
+  desc: string;
+  action: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '13px 0',
+        borderBottom: '1px solid var(--border)',
+      }}
+    >
+      <div>
+        <div style={{ fontSize: 13.5, fontWeight: 500, letterSpacing: '-0.01em' }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{desc}</div>
+      </div>
+      {action}
     </div>
   );
 }

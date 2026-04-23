@@ -27,8 +27,19 @@ export function Gallery({
 }) {
   if (loading && imgs.length === 0) {
     return (
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 13 }}>
-        Loading...
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--text-3)',
+          fontSize: 13,
+          gap: 8,
+        }}
+      >
+        <div style={{ width: 16, height: 16, border: '2px solid var(--border-mid)', borderTopColor: 'var(--text-2)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        Loading…
       </div>
     );
   }
@@ -45,12 +56,12 @@ export function Gallery({
   }
 
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: 22 }}>
+    <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
       {viewMode === 'grid' ? (
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
             gap: 12,
           }}
         >
@@ -117,16 +128,16 @@ function EmptyState({
         alignItems: 'center',
         justifyContent: 'center',
         flex: 1,
-        gap: 12,
-        padding: 40,
+        gap: 14,
+        padding: 48,
         textAlign: 'center',
       }}
     >
       <div
         style={{
-          width: 52,
-          height: 52,
-          borderRadius: 14,
+          width: 56,
+          height: 56,
+          borderRadius: 'var(--r-lg)',
           background: 'var(--sidebar-bg)',
           border: '1px solid var(--border)',
           display: 'flex',
@@ -134,11 +145,11 @@ function EmptyState({
           justifyContent: 'center',
         }}
       >
-        <Icon name="image" size={22} color="var(--text-3)" />
+        <Icon name="image" size={24} color="var(--text-3)" />
       </div>
       <div>
-        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 5 }}>{title}</div>
-        <div style={{ fontSize: 13, color: 'var(--text-3)', maxWidth: 240 }}>{desc}</div>
+        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6, letterSpacing: '-0.01em' }}>{title}</div>
+        <div style={{ fontSize: 13, color: 'var(--text-3)', maxWidth: 240, lineHeight: 1.5 }}>{desc}</div>
       </div>
       {action && onAction && (
         <Btn variant="outline" icon="upload" onClick={onAction}>

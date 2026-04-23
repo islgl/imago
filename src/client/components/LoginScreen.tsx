@@ -53,101 +53,127 @@ export function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
         style={{
           width: 360,
           padding: '36px 32px 28px',
-          background: '#fff',
-          borderRadius: 12,
-          boxShadow: 'var(--shadow-md)',
+          background: 'var(--bg)',
+          borderRadius: 'var(--r-xl)',
+          boxShadow: 'var(--shadow-lg)',
           border: '1px solid var(--border)',
-          animation: 'fadeIn .2s ease',
+          animation: 'fadeIn 0.2s ease',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 40 40"
-            fill="none"
-            style={{ flexShrink: 0, display: 'block', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.22))' }}
-            aria-label="imago"
-          >
-            <defs>
-              <linearGradient id="ls-imago-shell" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#2d2d2d" />
-                <stop offset="1" stopColor="#1a1a1a" />
-              </linearGradient>
-              <radialGradient id="ls-imago-glow" cx="0.5" cy="0.5" r="0.42">
-                <stop offset="0" stopColor="#f5e6c3" stopOpacity="1" />
-                <stop offset="0.55" stopColor="#d7b27a" stopOpacity="0.5" />
-                <stop offset="1" stopColor="#a07944" stopOpacity="0" />
-              </radialGradient>
-            </defs>
-            <rect width="40" height="40" rx="10" fill="url(#ls-imago-shell)" />
-            <path
-              d="M 9 20 Q 20 9 31 20 Q 20 31 9 20 Z"
-              stroke="#e8e6e2"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-              fill="none"
-            />
-            <circle cx="20" cy="20" r="4" fill="url(#ls-imago-glow)" />
-            <circle cx="20" cy="20" r="1.2" fill="#f5e6c3" />
-          </svg>
+        {/* Logo + title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 32 }}>
+          <ImagoLogoLg />
           <div>
             <div
               style={{
                 fontFamily: "'Newsreader', Georgia, serif",
                 fontStyle: 'italic',
-                fontSize: 22,
+                fontSize: 24,
                 fontWeight: 500,
-                letterSpacing: '-.015em',
+                letterSpacing: '-0.02em',
+                color: 'var(--text-1)',
+                lineHeight: 1,
               }}
             >
               imago
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>sign in to continue</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>sign in to continue</div>
           </div>
         </div>
 
-        <label
-          style={{
-            display: 'block',
-            fontSize: 12,
-            fontWeight: 500,
-            color: 'var(--text-2)',
-            marginBottom: 6,
-          }}
-        >
-          Password
-        </label>
-        <input
-          ref={inputRef}
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-          style={{
-            width: '100%',
-            padding: '9px 12px',
-            fontSize: 14,
-            fontFamily: 'inherit',
-            color: 'var(--text-1)',
-            background: 'var(--sidebar-bg)',
-            border: '1px solid ' + (error ? 'var(--danger)' : 'var(--border-mid)'),
-            borderRadius: 'var(--r)',
-            outline: 'none',
-            transition: 'border-color .12s',
-          }}
-        />
-
-        {error && (
-          <div style={{ fontSize: 12, color: 'var(--danger)', marginTop: 8 }}>{error}</div>
-        )}
-
-        <div style={{ marginTop: 20 }}>
-          <Btn variant="solid" size="lg" disabled={loading || !password} style={{ width: '100%', justifyContent: 'center' }}>
-            {loading ? 'Signing in…' : 'Sign in'}
-          </Btn>
+        <div style={{ marginBottom: 18 }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 12,
+              fontWeight: 500,
+              color: 'var(--text-2)',
+              marginBottom: 7,
+              letterSpacing: '-0.005em',
+            }}
+          >
+            Password
+          </label>
+          <input
+            ref={inputRef}
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            style={{
+              width: '100%',
+              padding: '9px 12px',
+              fontSize: 14,
+              fontFamily: 'inherit',
+              color: 'var(--text-1)',
+              background: 'var(--sidebar-bg)',
+              border: `1px solid ${error ? 'var(--danger)' : 'var(--border-mid)'}`,
+              borderRadius: 'var(--r)',
+              outline: 'none',
+              transition: 'border-color 0.12s, box-shadow 0.12s',
+            }}
+            onFocus={(e) => {
+              (e.currentTarget as HTMLInputElement).style.borderColor = error ? 'var(--danger)' : 'var(--accent)';
+              (e.currentTarget as HTMLInputElement).style.boxShadow = error
+                ? '0 0 0 3px oklch(0.52 0.20 25 / 10%)'
+                : '0 0 0 3px oklch(0.56 0.22 263 / 10%)';
+            }}
+            onBlur={(e) => {
+              (e.currentTarget as HTMLInputElement).style.borderColor = error ? 'var(--danger)' : 'var(--border-mid)';
+              (e.currentTarget as HTMLInputElement).style.boxShadow = 'none';
+            }}
+          />
+          {error && (
+            <div style={{ fontSize: 12, color: 'var(--danger)', marginTop: 7 }}>{error}</div>
+          )}
         </div>
+
+        <Btn
+          variant="solid"
+          size="lg"
+          disabled={loading || !password}
+          style={{ width: '100%', justifyContent: 'center' }}
+        >
+          {loading ? 'Signing in…' : 'Sign in'}
+        </Btn>
       </form>
     </div>
+  );
+}
+
+function ImagoLogoLg() {
+  return (
+    <svg
+      width="44"
+      height="44"
+      viewBox="0 0 44 44"
+      fill="none"
+      style={{ flexShrink: 0, filter: 'drop-shadow(0 3px 8px oklch(0 0 0 / 26%))' }}
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="ls-shell" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#323232" />
+          <stop offset="1" stopColor="#1c1c1c" />
+        </linearGradient>
+        <radialGradient id="ls-glow" cx="0.5" cy="0.5" r="0.42">
+          <stop offset="0" stopColor="#e8e4da" stopOpacity="1" />
+          <stop offset="0.55" stopColor="#c4b89a" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#998060" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="44" height="44" rx="11" fill="url(#ls-shell)" />
+      <path
+        d="M 11 22 Q 22 11 33 22 Q 22 33 11 22 Z"
+        stroke="#e0dcd2"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.9"
+      />
+      <circle cx="22" cy="22" r="5" fill="url(#ls-glow)" />
+      <circle cx="22" cy="22" r="1.5" fill="#e8e4da" opacity="0.95" />
+    </svg>
   );
 }

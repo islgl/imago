@@ -1,42 +1,132 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:              #ffffff;
-  --sidebar-bg:      #f7f6f5;
-  --hover-bg:        rgba(55, 53, 47, 0.08);
-  --active-bg:       rgba(55, 53, 47, 0.11);
-  --border:          rgba(55, 53, 47, 0.09);
-  --border-mid:      rgba(55, 53, 47, 0.16);
-  --text-1:          #37352f;
-  --text-2:          #787774;
-  --text-3:          #acaba8;
-  --accent:          #2383e2;
-  --accent-bg:       rgba(35, 131, 226, 0.08);
-  --success:         #0f7b6c;
-  --danger:          #d44c47;
-  --shadow-sm:       0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md:       0 4px 16px rgba(0,0,0,.09), 0 1px 4px rgba(0,0,0,.05);
-  --shadow-xl:       0 20px 60px rgba(0,0,0,.14), 0 6px 20px rgba(0,0,0,.06);
-  --r:               6px;
-  --sidebar:         248px;
-  --detail:          284px;
+  /* Background layers */
+  --bg:              oklch(1 0 0);
+  --sidebar-bg:      oklch(0.975 0 0);
+  --card-bg:         oklch(1 0 0);
+
+  /* Interactive states */
+  --hover-bg:        oklch(0 0 0 / 5%);
+  --active-bg:       oklch(0 0 0 / 8%);
+
+  /* Borders */
+  --border:          oklch(0 0 0 / 8%);
+  --border-mid:      oklch(0 0 0 / 14%);
+
+  /* Text */
+  --text-1:          oklch(0.18 0 0);
+  --text-2:          oklch(0.46 0 0);
+  --text-3:          oklch(0.64 0 0);
+
+  /* Accent (blue) */
+  --accent:          oklch(0.56 0.22 263);
+  --accent-hover:    oklch(0.50 0.22 263);
+  --accent-bg:       oklch(0.56 0.22 263 / 8%);
+
+  /* Semantic */
+  --success:         oklch(0.52 0.13 160);
+  --danger:          oklch(0.52 0.20 25);
+  --danger-hover:    oklch(0.46 0.20 25);
+
+  /* Shadows */
+  --shadow-sm:       0 1px 2px oklch(0 0 0 / 5%), 0 1px 3px oklch(0 0 0 / 4%);
+  --shadow-md:       0 4px 16px oklch(0 0 0 / 9%), 0 2px 6px oklch(0 0 0 / 5%);
+  --shadow-lg:       0 8px 32px oklch(0 0 0 / 12%), 0 4px 12px oklch(0 0 0 / 6%);
+  --shadow-xl:       0 24px 64px oklch(0 0 0 / 16%), 0 8px 24px oklch(0 0 0 / 8%);
+
+  /* Radius */
+  --r-xs:  3px;
+  --r-sm:  5px;
+  --r:     7px;
+  --r-md:  9px;
+  --r-lg:  12px;
+  --r-xl:  16px;
+
+  /* Layout */
+  --sidebar:         252px;
+  --detail:          288px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:              oklch(0.145 0 0);
+    --sidebar-bg:      oklch(0.19 0 0);
+    --card-bg:         oklch(0.19 0 0);
+
+    --hover-bg:        oklch(1 0 0 / 6%);
+    --active-bg:       oklch(1 0 0 / 10%);
+
+    --border:          oklch(1 0 0 / 9%);
+    --border-mid:      oklch(1 0 0 / 16%);
+
+    --text-1:          oklch(0.96 0 0);
+    --text-2:          oklch(0.70 0 0);
+    --text-3:          oklch(0.52 0 0);
+
+    --accent:          oklch(0.65 0.22 263);
+    --accent-hover:    oklch(0.72 0.22 263);
+    --accent-bg:       oklch(0.65 0.22 263 / 12%);
+
+    --success:         oklch(0.65 0.13 160);
+    --danger:          oklch(0.65 0.20 25);
+    --danger-hover:    oklch(0.72 0.20 25);
+
+    --shadow-sm:       0 1px 3px oklch(0 0 0 / 25%);
+    --shadow-md:       0 4px 16px oklch(0 0 0 / 36%), 0 2px 6px oklch(0 0 0 / 20%);
+    --shadow-lg:       0 8px 32px oklch(0 0 0 / 44%), 0 4px 12px oklch(0 0 0 / 24%);
+    --shadow-xl:       0 24px 64px oklch(0 0 0 / 54%), 0 8px 24px oklch(0 0 0 / 32%);
+  }
 }
 
 html, body, #root { height: 100%; }
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--text-1);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 #root { display: flex; overflow: hidden; }
 
+/* Scrollbar */
 ::-webkit-scrollbar        { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: rgba(55,53,47,.18); border-radius: 3px; }
+::-webkit-scrollbar-thumb  { background: oklch(0 0 0 / 14%); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0 0 0 / 22%); }
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb { background: oklch(1 0 0 / 16%); }
+  ::-webkit-scrollbar-thumb:hover { background: oklch(1 0 0 / 26%); }
+}
 
-input, button { font-family: inherit; }
+/* Selection */
+::selection { background: var(--accent-bg); color: var(--text-1); }
 
-@keyframes fadeIn  { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: scale(1); } }
-@keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes pulse   { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+input, button, textarea { font-family: inherit; }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Keyframes */
+@keyframes fadeIn  {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

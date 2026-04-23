@@ -32,12 +32,12 @@ export function DetailPanel({
   const albumName = albums.find((a) => a.id === img.albumId)?.name ?? '—';
 
   const meta = [
-    { k: 'Filename', v: img.filename },
-    { k: 'Dimensions', v: img.width && img.height ? `${img.width} × ${img.height} px` : '—' },
-    { k: 'Size', v: formatBytes(img.sizeBytes) },
-    { k: 'Format', v: extFromFilename(img.filename) },
-    { k: 'Uploaded', v: formatDate(img.createdAt) },
-    { k: 'Album', v: albumName },
+    { k: 'Filename',   v: img.filename },
+    { k: 'Dimensions', v: img.width && img.height ? `${img.width} × ${img.height}` : '—' },
+    { k: 'Size',       v: formatBytes(img.sizeBytes) },
+    { k: 'Format',     v: extFromFilename(img.filename) },
+    { k: 'Uploaded',   v: formatDate(img.createdAt) },
+    { k: 'Album',      v: albumName },
   ];
 
   return (
@@ -46,61 +46,42 @@ export function DetailPanel({
         width: 'var(--detail)',
         minWidth: 'var(--detail)',
         borderLeft: '1px solid var(--border)',
-        background: '#fff',
+        background: 'var(--bg)',
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
         overflow: 'hidden',
-        animation: 'slideIn .18s ease',
+        animation: 'slideIn 0.18s ease',
       }}
     >
+      {/* Header */}
       <div
         style={{
           height: 50,
-          padding: '0 16px',
+          padding: '0 14px',
           borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
+          gap: 6,
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 500, flex: 1 }}>Details</span>
-        <button
-          onClick={() => onToggleStar(img)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: img.isStarred ? '#f5c542' : 'var(--text-3)',
-            padding: 5,
-            borderRadius: 4,
-            display: 'flex',
-          }}
+        <span style={{ fontSize: 13, fontWeight: 600, flex: 1, letterSpacing: '-0.01em' }}>Details</span>
+        <IconBtn
+          icon="star"
           title={img.isStarred ? 'Unstar' : 'Star'}
-        >
-          <Icon name="star" size={14} />
-        </button>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--text-3)',
-            padding: 5,
-            borderRadius: 4,
-            display: 'flex',
-          }}
-        >
-          <Icon name="close" size={14} />
-        </button>
+          onClick={() => onToggleStar(img)}
+          style={{ color: img.isStarred ? '#f0c040' : 'var(--text-3)' }}
+        />
+        <IconBtn icon="close" title="Close" onClick={onClose} />
       </div>
 
-      <div style={{ aspectRatio: '4/3', background: '#eeede9', overflow: 'hidden', flexShrink: 0 }}>
+      {/* Preview */}
+      <div style={{ aspectRatio: '4/3', background: 'oklch(0.93 0 0)', overflow: 'hidden', flexShrink: 0 }}>
         <img src={img.url} alt={img.filename} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
 
+      {/* Tabs */}
       <div
         style={{
           display: 'flex',
@@ -115,14 +96,16 @@ export function DetailPanel({
             key={id}
             onClick={() => setTab(id)}
             style={{
-              padding: '4px 12px',
+              padding: '5px 12px',
               fontSize: 12.5,
               fontWeight: tab === id ? 500 : 400,
               border: 'none',
               cursor: 'pointer',
-              borderRadius: 5,
+              borderRadius: 'var(--r-sm)',
               background: tab === id ? 'var(--active-bg)' : 'transparent',
               color: tab === id ? 'var(--text-1)' : 'var(--text-2)',
+              letterSpacing: '-0.01em',
+              transition: 'background 0.1s, color 0.1s',
             }}
           >
             {label}
@@ -130,11 +113,12 @@ export function DetailPanel({
         ))}
       </div>
 
+      {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {tab === 'info' && (
           <div style={{ padding: 16 }}>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, wordBreak: 'break-all', lineHeight: 1.5 }}>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, wordBreak: 'break-all', lineHeight: 1.5, letterSpacing: '-0.01em' }}>
                 {img.filename}
               </div>
               <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 3 }}>
@@ -142,20 +126,22 @@ export function DetailPanel({
               </div>
             </div>
 
+            {/* Public toggle */}
             <button
               onClick={() => onTogglePublic(img)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                padding: '9px 12px',
-                background: img.isPublic ? 'rgba(35,131,226,.07)' : 'var(--sidebar-bg)',
-                borderRadius: 8,
+                gap: 9,
+                padding: '10px 12px',
+                background: img.isPublic ? 'var(--accent-bg)' : 'var(--sidebar-bg)',
+                borderRadius: 'var(--r)',
                 marginBottom: 16,
-                border: `1px solid ${img.isPublic ? 'rgba(35,131,226,.18)' : 'var(--border)'}`,
+                border: `1px solid ${img.isPublic ? 'oklch(0.56 0.22 263 / 20%)' : 'var(--border)'}`,
                 width: '100%',
                 cursor: 'pointer',
                 textAlign: 'left',
+                transition: 'all 0.12s',
               }}
             >
               <Icon
@@ -164,13 +150,7 @@ export function DetailPanel({
                 color={img.isPublic ? 'var(--accent)' : 'var(--text-3)'}
               />
               <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 12.5,
-                    fontWeight: 500,
-                    color: img.isPublic ? 'var(--accent)' : 'var(--text-2)',
-                  }}
-                >
+                <div style={{ fontSize: 12.5, fontWeight: 500, color: img.isPublic ? 'var(--accent)' : 'var(--text-2)' }}>
                   {img.isPublic ? 'Public' : 'Private'}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>
@@ -179,13 +159,14 @@ export function DetailPanel({
               </div>
             </button>
 
+            {/* Meta table */}
             <div>
               <div
                 style={{
                   fontSize: 10.5,
                   fontWeight: 600,
                   color: 'var(--text-3)',
-                  letterSpacing: '.06em',
+                  letterSpacing: '0.07em',
                   textTransform: 'uppercase',
                   marginBottom: 8,
                 }}
@@ -213,6 +194,7 @@ export function DetailPanel({
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
+                      letterSpacing: '-0.01em',
                     }}
                   >
                     {v}
@@ -225,24 +207,15 @@ export function DetailPanel({
 
         {tab === 'link' && (
           <div style={{ padding: 16 }}>
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: 'var(--text-3)',
-                letterSpacing: '.05em',
-                textTransform: 'uppercase',
-                marginBottom: 10,
-              }}
-            >
+            <SectionLabel>
               Direct URL {!img.isPublic && <span style={{ textTransform: 'none', fontWeight: 400, color: 'var(--text-3)' }}>(private)</span>}
-            </div>
+            </SectionLabel>
 
             <div
               style={{
                 background: 'var(--sidebar-bg)',
                 border: '1px solid var(--border)',
-                borderRadius: 8,
+                borderRadius: 'var(--r)',
                 padding: '10px 12px',
                 marginBottom: 10,
                 fontFamily: 'ui-monospace, "SF Mono", monospace',
@@ -265,27 +238,16 @@ export function DetailPanel({
             </Btn>
 
             <div style={{ marginTop: 20 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: 'var(--text-3)',
-                  letterSpacing: '.05em',
-                  textTransform: 'uppercase',
-                  marginBottom: 10,
-                }}
-              >
-                Embed
-              </div>
+              <SectionLabel>Embed</SectionLabel>
               {makeEmbeds(linkUrl).map(({ label, code }) => (
-                <div key={label} style={{ marginBottom: 8 }}>
+                <div key={label} style={{ marginBottom: 10 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 4 }}>{label}</div>
                   <div
                     style={{
                       background: 'var(--sidebar-bg)',
                       border: '1px solid var(--border)',
-                      borderRadius: 5,
-                      padding: '7px 10px',
+                      borderRadius: 'var(--r-sm)',
+                      padding: '8px 10px',
                       fontFamily: 'ui-monospace, monospace',
                       fontSize: 11,
                       color: 'var(--text-2)',
@@ -302,9 +264,10 @@ export function DetailPanel({
         )}
       </div>
 
+      {/* Actions footer */}
       <div
         style={{
-          padding: '10px 14px 14px',
+          padding: '10px 12px 14px',
           borderTop: '1px solid var(--border)',
           display: 'flex',
           gap: 7,
@@ -340,5 +303,62 @@ export function DetailPanel({
         />
       </div>
     </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        fontSize: 10.5,
+        fontWeight: 600,
+        color: 'var(--text-3)',
+        letterSpacing: '0.07em',
+        textTransform: 'uppercase',
+        marginBottom: 10,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function IconBtn({
+  icon,
+  title,
+  onClick,
+  style,
+}: {
+  icon: string;
+  title: string;
+  onClick: () => void;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <button
+      title={title}
+      onClick={onClick}
+      style={{
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        color: 'var(--text-3)',
+        padding: 5,
+        borderRadius: 'var(--r-sm)',
+        display: 'flex',
+        transition: 'color 0.12s, background 0.12s',
+        ...style,
+      }}
+      onMouseEnter={(e) => {
+        if (!style?.color) (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-1)';
+        (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)';
+      }}
+      onMouseLeave={(e) => {
+        if (!style?.color) (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-3)';
+        (e.currentTarget as HTMLButtonElement).style.background = 'none';
+      }}
+    >
+      <Icon name={icon} size={14} />
+    </button>
   );
 }

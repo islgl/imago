@@ -26,10 +26,10 @@ export function ImageCard({
       await onCopy(img);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
-    } catch {
-      /* noop */
-    }
+    } catch { /* noop */ }
   };
+
+  const showOverlay = hov || selected;
 
   return (
     <div
@@ -42,15 +42,15 @@ export function ImageCard({
       }}
       style={{
         position: 'relative',
-        borderRadius: 8,
+        borderRadius: 'var(--r-md)',
         overflow: 'hidden',
-        background: '#eeede9',
+        background: 'oklch(0.93 0 0)',
         cursor: 'pointer',
         outline: selected ? '2px solid var(--accent)' : '2px solid transparent',
         outlineOffset: -2,
         transform: hov && !selected ? 'translateY(-2px)' : 'none',
         boxShadow: hov ? 'var(--shadow-md)' : 'var(--shadow-sm)',
-        transition: 'transform .15s, box-shadow .15s, outline .1s',
+        transition: 'transform 0.18s, box-shadow 0.18s, outline 0.1s',
         aspectRatio: '4/3',
       }}
     >
@@ -61,74 +61,74 @@ export function ImageCard({
         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
       />
 
+      {/* Overlay gradient */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
           pointerEvents: 'none',
-          background:
-            'linear-gradient(to bottom, rgba(0,0,0,.4) 0%, transparent 35%, transparent 55%, rgba(0,0,0,.55) 100%)',
-          opacity: hov || selected ? 1 : 0,
-          transition: 'opacity .15s',
+          background: 'linear-gradient(to bottom, oklch(0 0 0 / 42%) 0%, transparent 35%, transparent 52%, oklch(0 0 0 / 58%) 100%)',
+          opacity: showOverlay ? 1 : 0,
+          transition: 'opacity 0.15s',
         }}
       />
 
-      <div style={{ position: 'absolute', top: 8, left: 8, opacity: hov || selected ? 1 : 0, transition: 'opacity .15s' }}>
+      {/* Select checkbox */}
+      <div style={{ position: 'absolute', top: 8, left: 8, opacity: showOverlay ? 1 : 0, transition: 'opacity 0.15s' }}>
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(img.id);
-          }}
+          onClick={(e) => { e.stopPropagation(); onSelect(img.id); }}
           style={{
-            width: 19,
-            height: 19,
+            width: 18,
+            height: 18,
             borderRadius: 5,
             cursor: 'pointer',
-            background: selected ? 'var(--accent)' : 'rgba(255,255,255,.88)',
-            border: selected ? 'none' : '1.5px solid rgba(255,255,255,.5)',
+            background: selected ? 'var(--accent)' : 'oklch(1 0 0 / 88%)',
+            border: selected ? 'none' : '1.5px solid oklch(1 0 0 / 50%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transition: 'all .12s',
+            transition: 'all 0.12s',
           }}
         >
-          {selected && <Icon name="check" size={11} color="#fff" />}
+          {selected && <Icon name="check" size={10} color="#fff" />}
         </div>
       </div>
 
+      {/* Badges */}
       <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4 }}>
         {img.isStarred && (
           <div
             style={{
-              background: 'rgba(255,255,255,.15)',
-              backdropFilter: 'blur(6px)',
-              borderRadius: 4,
+              background: 'oklch(0 0 0 / 30%)',
+              backdropFilter: 'blur(8px)',
+              borderRadius: 'var(--r-xs)',
               padding: '2px 5px',
               display: 'flex',
               alignItems: 'center',
             }}
           >
-            <Icon name="star" size={10} color="#f5c542" />
+            <Icon name="star" size={10} color="#f0c040" />
           </div>
         )}
         {img.isPublic && (
           <div
             style={{
-              background: 'rgba(255,255,255,.15)',
-              backdropFilter: 'blur(6px)',
-              borderRadius: 4,
+              background: 'oklch(0 0 0 / 30%)',
+              backdropFilter: 'blur(8px)',
+              borderRadius: 'var(--r-xs)',
               padding: '2px 6px',
               display: 'flex',
               alignItems: 'center',
               gap: 3,
             }}
           >
-            <Icon name="globe" size={9} color="rgba(255,255,255,.9)" />
-            <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,.9)', fontWeight: 500 }}>Public</span>
+            <Icon name="globe" size={9} color="oklch(1 0 0 / 90%)" />
+            <span style={{ fontSize: 9.5, color: 'oklch(1 0 0 / 90%)', fontWeight: 500 }}>Public</span>
           </div>
         )}
       </div>
 
+      {/* Bottom bar */}
       <div
         style={{
           position: 'absolute',
@@ -139,8 +139,8 @@ export function ImageCard({
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'space-between',
-          opacity: hov || selected ? 1 : 0,
-          transition: 'opacity .15s',
+          opacity: showOverlay ? 1 : 0,
+          transition: 'opacity 0.15s',
         }}
       >
         <div style={{ minWidth: 0 }}>
@@ -152,7 +152,7 @@ export function ImageCard({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              maxWidth: 120,
+              maxWidth: 110,
               lineHeight: 1.3,
             }}
           >
@@ -169,13 +169,13 @@ export function ImageCard({
             fontSize: 11,
             fontWeight: 500,
             fontFamily: 'inherit',
-            background: copied ? 'rgba(255,255,255,.92)' : 'rgba(255,255,255,.18)',
-            backdropFilter: 'blur(8px)',
+            background: copied ? 'oklch(1 0 0 / 92%)' : 'oklch(0 0 0 / 30%)',
+            backdropFilter: 'blur(10px)',
             color: copied ? 'var(--success)' : '#fff',
             border: 'none',
-            borderRadius: 4,
+            borderRadius: 'var(--r-sm)',
             cursor: 'pointer',
-            transition: 'all .15s',
+            transition: 'all 0.15s',
             flexShrink: 0,
           }}
         >

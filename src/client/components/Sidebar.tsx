@@ -33,15 +33,15 @@ export function Sidebar({
   onCreateAlbum: () => void;
 }) {
   const [hov, setHov] = useState<string | null>(null);
-  const totalBytes = 10 * 1024 * 1024 * 1024; // 10 GB free plan reference
+  const totalBytes = 10 * 1024 * 1024 * 1024;
   const used = storage?.usedBytes ?? 0;
   const usedPct = Math.min((used / totalBytes) * 100, 100);
 
   const sections: { id: NavView; label: string; icon: string; count: number }[] = [
-    { id: 'all', label: 'All', icon: 'image', count: allCount },
-    { id: 'starred', label: 'Starred', icon: 'star', count: starredCount },
-    { id: 'recent', label: 'Recent', icon: 'sparkle', count: recentCount },
-    { id: 'trash', label: 'Trash', icon: 'trash', count: trashCount },
+    { id: 'all',     label: 'All images', icon: 'image',   count: allCount },
+    { id: 'starred', label: 'Starred',    icon: 'star',    count: starredCount },
+    { id: 'recent',  label: 'Recent',     icon: 'sparkle', count: recentCount },
+    { id: 'trash',   label: 'Trash',      icon: 'trash',   count: trashCount },
   ];
 
   const isActive = (id: string) => view === id || activeAlbumId === id;
@@ -60,45 +60,24 @@ export function Sidebar({
         userSelect: 'none',
       }}
     >
-      {/* Brand · B · Aperture logo */}
-      <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <svg
-          width="30"
-          height="30"
-          viewBox="0 0 30 30"
-          fill="none"
-          style={{ flexShrink: 0, display: 'block', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,.22))' }}
-          aria-label="imago"
-        >
-          <defs>
-            <linearGradient id="sb-imago-shell" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#2d2d2d" />
-              <stop offset="1" stopColor="#1a1a1a" />
-            </linearGradient>
-          </defs>
-          <rect width="30" height="30" rx="7" fill="url(#sb-imago-shell)" />
-          <path
-            d="M 6 15 Q 15 6 24 15 Q 15 24 6 15 Z"
-            stroke="#f5e6c3"
-            strokeWidth="1.3"
-            strokeLinejoin="round"
-            fill="none"
-          />
-          <circle cx="15" cy="15" r="2" fill="#f5e6c3" />
-        </svg>
+      {/* Brand */}
+      <div style={{ padding: '16px 14px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <ImagoLogo size={28} />
         <div
           style={{
             fontFamily: "'Newsreader', Georgia, serif",
             fontStyle: 'italic',
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: 500,
-            letterSpacing: '-.015em',
+            letterSpacing: '-0.02em',
+            color: 'var(--text-1)',
           }}
         >
           imago
         </div>
         <button
           onClick={() => onNav('settings')}
+          title="Settings"
           style={{
             marginLeft: 'auto',
             background: 'none',
@@ -106,17 +85,25 @@ export function Sidebar({
             cursor: 'pointer',
             color: 'var(--text-3)',
             padding: 5,
-            borderRadius: 5,
+            borderRadius: 'var(--r-sm)',
             display: 'flex',
+            transition: 'color 0.12s, background 0.12s',
           }}
-          title="Settings"
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-1)';
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-3)';
+            (e.currentTarget as HTMLButtonElement).style.background = 'none';
+          }}
         >
           <Icon name="settings" size={14} />
         </button>
       </div>
 
       {/* Upload CTA */}
-      <div style={{ padding: '2px 12px 8px' }}>
+      <div style={{ padding: '0 10px 10px' }}>
         <button
           onClick={onUpload}
           style={{
@@ -127,46 +114,48 @@ export function Sidebar({
             gap: 7,
             padding: '8px 12px',
             background: 'var(--text-1)',
-            color: '#fff',
+            color: 'var(--bg)',
             border: 'none',
             borderRadius: 'var(--r)',
             cursor: 'pointer',
             fontSize: 13,
             fontWeight: 500,
-            transition: 'opacity .12s',
+            letterSpacing: '-0.01em',
+            transition: 'opacity 0.12s',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = '.88')}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = '0.86')}
+          onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = '1')}
         >
-          <Icon name="upload" size={14} color="#fff" />
+          <Icon name="upload" size={14} />
           Upload
         </button>
       </div>
 
       {/* Search */}
-      <div style={{ padding: '0 10px 6px' }}>
+      <div style={{ padding: '0 10px 8px' }}>
         <label
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 7,
-            background: 'rgba(255,255,255,.7)',
+            background: 'var(--bg)',
             border: '1px solid var(--border)',
             borderRadius: 'var(--r)',
             padding: '6px 10px',
             cursor: 'text',
+            transition: 'border-color 0.12s',
           }}
         >
           <Icon name="search" size={13} color="var(--text-3)" />
           <input
             value={searchQuery}
             onChange={(e) => onSearch(e.target.value)}
-            placeholder="Search..."
+            placeholder="Search…"
             style={{
               border: 'none',
               outline: 'none',
               background: 'transparent',
-              fontSize: 12,
+              fontSize: 12.5,
               color: 'var(--text-1)',
               width: '100%',
             }}
@@ -174,10 +163,10 @@ export function Sidebar({
         </label>
       </div>
 
-      <div style={{ height: 1, background: 'var(--border)', margin: '2px 12px 6px' }} />
+      <div style={{ height: 1, background: 'var(--border)', margin: '0 12px 6px' }} />
 
       {/* Nav */}
-      <nav style={{ flex: 1, overflowY: 'auto', padding: '0 8px' }}>
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 0' }}>
         <SectionLabel>Browse</SectionLabel>
         {sections.map((item) => (
           <NavRow
@@ -200,25 +189,33 @@ export function Sidebar({
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '6px 8px 2px',
+            padding: '2px 8px 4px',
           }}
         >
-          <SectionLabel style={{ margin: 0 }}>Albums</SectionLabel>
+          <SectionLabel style={{ margin: 0, flex: 1 }}>Albums</SectionLabel>
           <button
             onClick={onCreateAlbum}
+            title="New album"
             style={{
               background: 'none',
               border: 'none',
               cursor: 'pointer',
               color: 'var(--text-3)',
-              padding: 3,
-              borderRadius: 4,
+              padding: '3px 4px',
+              borderRadius: 'var(--r-xs)',
               display: 'flex',
+              transition: 'color 0.12s, background 0.12s',
             }}
-            title="New album"
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-1)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-3)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'none';
+            }}
           >
-            <Icon name="plus" size={12} />
+            <Icon name="plus" size={13} />
           </button>
         </div>
 
@@ -238,21 +235,27 @@ export function Sidebar({
         ))}
       </nav>
 
-      {/* Storage */}
-      <div style={{ padding: '12px 16px 14px', borderTop: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 500 }}>Storage</span>
+      {/* Storage footer */}
+      <div
+        style={{
+          padding: '12px 14px 16px',
+          borderTop: '1px solid var(--border)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Storage</span>
           <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
-            {formatBytes(used)} / 10 GB
+            {formatBytes(used)} <span style={{ color: 'var(--border-mid)' }}>/</span> 10 GB
           </span>
         </div>
-        <div style={{ height: 3, background: 'rgba(55,53,47,.12)', borderRadius: 2, overflow: 'hidden' }}>
+        <div style={{ height: 3, background: 'var(--border-mid)', borderRadius: 4, overflow: 'hidden' }}>
           <div
             style={{
               width: `${usedPct}%`,
               height: '100%',
-              background: 'var(--text-1)',
-              borderRadius: 2,
+              background: usedPct > 85 ? 'var(--danger)' : 'var(--text-1)',
+              borderRadius: 4,
+              transition: 'width 0.4s ease',
             }}
           />
         </div>
@@ -271,7 +274,7 @@ function SectionLabel({ children, style }: { children: React.ReactNode; style?: 
         fontSize: 10.5,
         fontWeight: 600,
         color: 'var(--text-3)',
-        letterSpacing: '.06em',
+        letterSpacing: '0.07em',
         textTransform: 'uppercase',
         padding: '6px 8px 3px',
         ...style,
@@ -312,7 +315,7 @@ function NavRow({
         alignItems: 'center',
         gap: 8,
         padding: '5px 8px',
-        borderRadius: 5,
+        borderRadius: 'var(--r-sm)',
         cursor: 'pointer',
         background: active ? 'var(--active-bg)' : hovered ? 'var(--hover-bg)' : 'transparent',
         border: 'none',
@@ -320,12 +323,45 @@ function NavRow({
         color: active ? 'var(--text-1)' : 'var(--text-2)',
         fontSize: 13,
         fontWeight: active ? 500 : 400,
-        transition: 'background .08s',
+        letterSpacing: '-0.005em',
+        transition: 'background 0.08s',
       }}
     >
       <Icon name={icon} size={14} />
-      <span style={{ flex: 1 }}>{children}</span>
-      {count !== undefined && <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{count}</span>}
+      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{children}</span>
+      {count !== undefined && (
+        <span style={{ fontSize: 11, color: 'var(--text-3)', fontVariantNumeric: 'tabular-nums' }}>{count}</span>
+      )}
     </button>
+  );
+}
+
+function ImagoLogo({ size = 30 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 30 30"
+      fill="none"
+      style={{ flexShrink: 0, display: 'block', filter: 'drop-shadow(0 2px 4px oklch(0 0 0 / 24%))' }}
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="sb-shell" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#323232" />
+          <stop offset="1" stopColor="#1c1c1c" />
+        </linearGradient>
+      </defs>
+      <rect width="30" height="30" rx="7" fill="url(#sb-shell)" />
+      <path
+        d="M 6.5 15 Q 15 6.5 23.5 15 Q 15 23.5 6.5 15 Z"
+        stroke="#e8e4da"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.9"
+      />
+      <circle cx="15" cy="15" r="2" fill="#e8e4da" opacity="0.95" />
+    </svg>
   );
 }

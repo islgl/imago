@@ -45,27 +45,27 @@ export function UploadModal({
         position: 'fixed',
         inset: 0,
         zIndex: 200,
-        background: 'rgba(0,0,0,.38)',
-        backdropFilter: 'blur(3px)',
+        background: 'oklch(0 0 0 / 40%)',
+        backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        animation: 'fadeIn .15s ease',
+        animation: 'fadeIn 0.15s ease',
       }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         style={{
-          width: 500,
-          background: '#fff',
-          borderRadius: 14,
+          width: 480,
+          background: 'var(--bg)',
+          borderRadius: 'var(--r-xl)',
           boxShadow: 'var(--shadow-xl)',
+          border: '1px solid var(--border)',
           overflow: 'hidden',
-          animation: 'fadeIn .18s ease',
+          animation: 'fadeIn 0.18s ease',
         }}
       >
+        {/* Header */}
         <div
           style={{
             padding: '18px 20px 0',
@@ -75,7 +75,7 @@ export function UploadModal({
           }}
         >
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600 }}>Upload images</div>
+            <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.02em' }}>Upload images</div>
             <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
               PNG · JPG · WebP · GIF · SVG · Max 20 MB
             </div>
@@ -88,8 +88,17 @@ export function UploadModal({
               cursor: 'pointer',
               color: 'var(--text-3)',
               padding: 6,
-              borderRadius: 6,
+              borderRadius: 'var(--r)',
               display: 'flex',
+              transition: 'color 0.1s, background 0.1s',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-1)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--hover-bg)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-3)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'none';
             }}
           >
             <Icon name="close" size={16} />
@@ -105,65 +114,50 @@ export function UploadModal({
                 accept="image/*"
                 multiple
                 style={{ display: 'none' }}
-                onChange={(e) => {
-                  if (e.target.files) handleFiles(e.target.files);
-                }}
+                onChange={(e) => { if (e.target.files) handleFiles(e.target.files); }}
               />
 
               <div
-                onDragEnter={(e) => {
-                  e.preventDefault();
-                  setDrag(true);
-                }}
-                onDragLeave={(e) => {
-                  e.preventDefault();
-                  setDrag(false);
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDrag(false);
-                  if (e.dataTransfer.files) handleFiles(e.dataTransfer.files);
-                }}
+                onDragEnter={(e) => { e.preventDefault(); setDrag(true); }}
+                onDragLeave={(e) => { e.preventDefault(); setDrag(false); }}
+                onDrop={(e) => { e.preventDefault(); setDrag(false); if (e.dataTransfer.files) handleFiles(e.dataTransfer.files); }}
                 onDragOver={(e) => e.preventDefault()}
                 onClick={() => fileInputRef.current?.click()}
                 style={{
-                  border: `1.5px dashed ${drag ? 'var(--accent)' : 'rgba(55,53,47,.22)'}`,
-                  borderRadius: 10,
-                  padding: '38px 20px',
+                  border: `1.5px dashed ${drag ? 'var(--accent)' : 'var(--border-mid)'}`,
+                  borderRadius: 'var(--r-md)',
+                  padding: '40px 20px',
                   textAlign: 'center',
                   background: drag ? 'var(--accent-bg)' : 'var(--sidebar-bg)',
                   cursor: 'pointer',
-                  transition: 'all .15s',
+                  transition: 'all 0.15s',
                 }}
               >
                 <div
                   style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 13,
-                    background: drag ? 'var(--accent-bg)' : 'rgba(55,53,47,.06)',
+                    width: 52,
+                    height: 52,
+                    borderRadius: 'var(--r-lg)',
+                    background: drag ? 'var(--accent-bg)' : 'var(--bg)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     margin: '0 auto 14px',
-                    border: drag ? '1px solid rgba(35,131,226,.3)' : '1px solid var(--border)',
+                    border: drag ? '1px solid oklch(0.56 0.22 263 / 30%)' : '1px solid var(--border)',
+                    transition: 'all 0.15s',
                   }}
                 >
                   <Icon name="upload" size={22} color={drag ? 'var(--accent)' : 'var(--text-2)'} />
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 5 }}>Drop files here</div>
-                <div style={{ fontSize: 12.5, color: 'var(--text-3)' }}>
+                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6, letterSpacing: '-0.01em' }}>Drop files here</div>
+                <div style={{ fontSize: 13, color: 'var(--text-3)' }}>
                   or <span style={{ color: 'var(--accent)', fontWeight: 500 }}>click to select</span>
                 </div>
               </div>
 
               <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                <Btn variant="ghost" onClick={onClose}>
-                  Cancel
-                </Btn>
-                <Btn variant="solid" icon="upload" onClick={() => fileInputRef.current?.click()}>
-                  Select files
-                </Btn>
+                <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
+                <Btn variant="solid" icon="upload" onClick={() => fileInputRef.current?.click()}>Select files</Btn>
               </div>
             </>
           )}
@@ -175,9 +169,9 @@ export function UploadModal({
               </div>
               <div
                 style={{
-                  height: 4,
-                  background: 'rgba(55,53,47,.1)',
-                  borderRadius: 2,
+                  height: 3,
+                  background: 'var(--border-mid)',
+                  borderRadius: 4,
                   overflow: 'hidden',
                   marginBottom: 10,
                 }}
@@ -186,9 +180,9 @@ export function UploadModal({
                   style={{
                     width: `${progress}%`,
                     height: '100%',
-                    background: 'var(--text-1)',
-                    borderRadius: 2,
-                    transition: 'width .18s ease',
+                    background: 'var(--accent)',
+                    borderRadius: 4,
+                    transition: 'width 0.18s ease',
                   }}
                 />
               </div>
@@ -197,13 +191,13 @@ export function UploadModal({
           )}
 
           {phase === 'done' && (
-            <div style={{ padding: '18px 0', textAlign: 'center' }}>
+            <div style={{ padding: '20px 0', textAlign: 'center' }}>
               <div
                 style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 12,
-                  background: 'rgba(15,123,108,.12)',
+                  width: 44,
+                  height: 44,
+                  borderRadius: 'var(--r-lg)',
+                  background: 'oklch(0.52 0.13 160 / 12%)',
                   margin: '0 auto 12px',
                   display: 'flex',
                   alignItems: 'center',
@@ -212,18 +206,18 @@ export function UploadModal({
               >
                 <Icon name="check" size={20} color="var(--success)" />
               </div>
-              <div style={{ fontSize: 14, fontWeight: 500 }}>Upload complete</div>
+              <div style={{ fontSize: 14, fontWeight: 500, letterSpacing: '-0.01em' }}>Upload complete</div>
             </div>
           )}
 
           {phase === 'error' && (
-            <div style={{ padding: '18px 0', textAlign: 'center' }}>
+            <div style={{ padding: '20px 0', textAlign: 'center' }}>
               <div
                 style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 12,
-                  background: 'rgba(212,76,71,.12)',
+                  width: 44,
+                  height: 44,
+                  borderRadius: 'var(--r-lg)',
+                  background: 'oklch(0.52 0.20 25 / 10%)',
                   margin: '0 auto 12px',
                   display: 'flex',
                   alignItems: 'center',
@@ -232,11 +226,9 @@ export function UploadModal({
               >
                 <Icon name="warning" size={20} color="var(--danger)" />
               </div>
-              <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Upload failed</div>
-              <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 14 }}>{error}</div>
-              <Btn variant="outline" onClick={() => setPhase('idle')}>
-                Retry
-              </Btn>
+              <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 6, letterSpacing: '-0.01em' }}>Upload failed</div>
+              <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginBottom: 16 }}>{error}</div>
+              <Btn variant="outline" onClick={() => setPhase('idle')}>Try again</Btn>
             </div>
           )}
         </div>
