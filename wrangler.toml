@@ -1,0 +1,28 @@
+name = "imago"
+main = "src/worker/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+
+routes = [
+  { pattern = "imago.lglgl.me", custom_domain = true }
+]
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "imago-images"
+preview_bucket_name = "imago-images-dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "imago"
+database_id = "369212c3-0eec-4cf5-93e2-b3db9666756d"
+migrations_dir = "migrations"
+
+[vars]
+ENVIRONMENT = "production"

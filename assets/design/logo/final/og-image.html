@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>imago · og image</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,500;1,400;1,500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #faf9f7;
+    font-family: 'Inter', sans-serif;
+    color: #37352f;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+  .logo { width: 200px; height: 200px; display: block; }
+  .wordmark {
+    font-family: 'Newsreader', Georgia, serif;
+    font-style: italic; font-weight: 500;
+    font-size: 96px; letter-spacing: -0.025em;
+    color: #37352f;
+    margin-top: 32px;
+  }
+  .tagline {
+    font-size: 20px; color: #787774; letter-spacing: 0.02em;
+    margin-top: 14px; font-weight: 400;
+  }
+  .domain {
+    position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%);
+    font-size: 12px; color: #acaba8; letter-spacing: 0.22em; text-transform: uppercase;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  }
+  .corner {
+    position: absolute; top: 48px; left: 48px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #acaba8;
+  }
+  .corner-r {
+    position: absolute; top: 48px; right: 48px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #acaba8;
+    font-family: 'Newsreader', Georgia, serif; font-style: italic; text-transform: none; letter-spacing: 0;
+  }
+  /* 底部极细装饰线 */
+  .hairline {
+    position: absolute; bottom: 88px; left: 50%; transform: translateX(-50%);
+    width: 48px; height: 1px; background: rgba(55,53,47,0.18);
+  }
+</style>
+</head>
+<body>
+
+<div class="corner">IMAGO · PRIVATE ARCHIVE</div>
+<div class="corner-r">a place for your images to become</div>
+
+<svg class="logo" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <linearGradient id="og-shell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2d2d2d"/>
+      <stop offset="1" stop-color="#1a1a1a"/>
+    </linearGradient>
+    <radialGradient id="og-glow" cx="0.5" cy="0.5" r="0.42">
+      <stop offset="0" stop-color="#f5e6c3" stop-opacity="1"/>
+      <stop offset="0.55" stop-color="#d7b27a" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#a07944" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="4" y="4" width="88" height="88" rx="22" fill="url(#og-shell)"/>
+  <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" stroke="#e8e6e2" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z" stroke="#e8e6e2" stroke-width="1" opacity="0.45"/>
+  <circle cx="48" cy="48" r="9" fill="url(#og-glow)"/>
+  <circle cx="48" cy="48" r="2.2" fill="#f5e6c3"/>
+</svg>
+
+<div class="wordmark">imago</div>
+<div class="tagline">your private archive — where images become</div>
+<div class="hairline"></div>
+<div class="domain">imago.lglgl.me</div>
+
+</body>
+</html>

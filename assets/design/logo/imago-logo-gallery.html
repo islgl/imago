@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>imago · logo exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:              #ffffff;
+    --paper:           #faf9f7;
+    --sidebar-bg:      #f7f6f5;
+    --text-1:          #37352f;
+    --text-2:          #787774;
+    --text-3:          #acaba8;
+    --border:          rgba(55, 53, 47, 0.09);
+    --border-mid:      rgba(55, 53, 47, 0.16);
+
+    /* logo palette */
+    --shell-top:       #2d2d2d;
+    --shell-bot:       #1a1a1a;
+
+    /* signature ember (A · 破茧的暖金光) */
+    --ember-lo:        #f4c988;
+    --ember-hi:        #b8864a;
+
+    /* signature glow (B · 光圈的瞳点) */
+    --glow:            #f0d9a8;
+
+    /* signature dawn (C · 显露的初生色) */
+    --dawn:            #e8d9c4;
+  }
+
+  html, body { min-height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-1);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+    padding: 64px 56px 96px;
+  }
+
+  /* ─────────  header  ───────── */
+  header { max-width: 1240px; margin: 0 auto 48px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 14px;
+  }
+  h1 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 400; font-size: 40px; line-height: 1.1;
+    letter-spacing: -0.02em; color: var(--text-1);
+    margin-bottom: 12px;
+  }
+  h1 em { font-style: italic; color: var(--text-2); }
+  .lede {
+    font-size: 15px; line-height: 1.6; color: var(--text-2);
+    max-width: 640px;
+  }
+  .lede b { color: var(--text-1); font-weight: 500; }
+
+  /* ─────────  grid  ───────── */
+  .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; max-width: 1240px; margin: 0 auto;
+  }
+
+  .variant {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 28px 24px;
+    display: flex; flex-direction: column;
+  }
+
+  .variant-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .variant-name {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 22px; font-weight: 500; letter-spacing: -0.01em;
+  }
+  .variant-name em { font-style: italic; color: var(--text-2); font-weight: 400; }
+  .variant-label {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* hero icon - 96px */
+  .hero-stage {
+    height: 176px;
+    background: var(--sidebar-bg);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+  }
+  .hero-icon { width: 96px; height: 96px; display: block; }
+
+  /* wordmark */
+  .wordmark-stage {
+    display: flex; align-items: center; gap: 14px;
+    padding: 20px 24px;
+    background: var(--paper);
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .wordmark-icon { width: 36px; height: 36px; flex-shrink: 0; }
+  .wordmark-text {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 26px; font-weight: 500; letter-spacing: -0.02em;
+    color: var(--text-1);
+  }
+  .wordmark-text em { font-style: italic; }
+
+  /* size scales */
+  .scales {
+    display: flex; align-items: flex-end; gap: 20px;
+    padding: 18px 20px; background: var(--paper); border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .scale { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .scale-label {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-3); font-family: monospace;
+  }
+  .scale-icon-16 { width: 16px; height: 16px; }
+  .scale-icon-32 { width: 32px; height: 32px; }
+  .scale-icon-48 { width: 48px; height: 48px; }
+
+  /* reasoning */
+  .reasoning {
+    font-size: 13px; line-height: 1.65; color: var(--text-2);
+    margin-bottom: 20px;
+  }
+  .reasoning b { color: var(--text-1); font-weight: 500; }
+  .reasoning-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 12px;
+  }
+  .tag {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  /* sidebar preview */
+  .sidebar-preview {
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    padding: 14px 16px 12px;
+    border: 1px solid var(--border);
+    margin-top: auto;
+  }
+  .sidebar-preview-caption {
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 12px;
+  }
+  .sidebar-brand { display: flex; align-items: center; gap: 10px; }
+  .sidebar-brand-icon { width: 30px; height: 30px; flex-shrink: 0; }
+  .sidebar-brand-name {
+    font-size: 14px; font-weight: 600; letter-spacing: -0.01em; color: var(--text-1);
+  }
+  .sidebar-brand-sub {
+    font-size: 11px; color: var(--text-3); margin-top: 1px;
+  }
+  .sidebar-brand-col { display: flex; flex-direction: column; }
+
+  /* footer */
+  footer {
+    max-width: 1240px; margin: 56px auto 0;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+  }
+  footer h3 {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 14px; font-weight: 500;
+  }
+  footer p { font-size: 13px; line-height: 1.65; color: var(--text-2); margin-bottom: 10px; }
+  footer p b { color: var(--text-1); font-weight: 500; }
+  footer code {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 12px; color: var(--text-1);
+    background: var(--paper); padding: 1px 6px; border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">junior designer · pass 01 · sketches</div>
+  <h1>为 imago 寻找 <em>蜕变</em> 的形</h1>
+  <p class="lede">
+    基于你选定的方向——<b>从蛹到蝶</b>。下面三个子方向都围绕「蜕变」展开，但在
+    <b>叙事张力</b>、<b>符号双关</b>、<b>含蓄克制</b> 三个维度上分布。
+    视觉 token 复用 imago 自有的 <code>#37352f</code> 墨色、暖米 sidebar、Inter 字体，
+    方便一步就嵌进产品。渐变用在签名色一处，不扩散。
+  </p>
+</header>
+
+<section class="grid">
+
+  <!-- ============ A · FISSURE ============ -->
+  <article class="variant">
+    <div class="variant-head">
+      <div class="variant-name">A · <em>Fissure</em></div>
+      <div class="variant-label">破茧 · 裂缝</div>
+    </div>
+
+    <!-- hero 96px -->
+    <div class="hero-stage">
+      <svg class="hero-icon" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="shell-a" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#2d2d2d"/>
+            <stop offset="1" stop-color="#1a1a1a"/>
+          </linearGradient>
+          <linearGradient id="ember-a" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f4c988"/>
+            <stop offset="0.5" stop-color="#e0a861"/>
+            <stop offset="1" stop-color="#8f5e2e"/>
+          </linearGradient>
+          <radialGradient id="ember-glow-a" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#f4c988" stop-opacity="0.55"/>
+            <stop offset="1" stop-color="#f4c988" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- shell -->
+        <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-a)"/>
+        <!-- soft inner glow behind fissure -->
+        <ellipse cx="48" cy="48" rx="14" ry="32" fill="url(#ember-glow-a)"/>
+        <!-- fissure path - an uneven split opening wider in middle -->
+        <path d="M 48 20 C 45 32, 52 42, 46 52 C 50 62, 44 72, 48 76"
+              stroke="url(#ember-a)" stroke-width="2.4" fill="none"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- wordmark -->
+    <div class="wordmark-stage">
+      <svg class="wordmark-icon" viewBox="0 0 96 96">
+        <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-a)"/>
+        <ellipse cx="48" cy="48" rx="14" ry="32" fill="url(#ember-glow-a)"/>
+        <path d="M 48 20 C 45 32, 52 42, 46 52 C 50 62, 44 72, 48 76"
+              stroke="url(#ember-a)" stroke-width="2.4" fill="none"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="wordmark-text"><em>imago</em></div>
+    </div>
+
+    <!-- scales -->
+    <div class="scales">
+      <div class="scale">
+        <svg class="scale-icon-16" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-a)"/>
+          <path d="M 48 22 L 48 74" stroke="#e0a861" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <span class="scale-label">16</span>
+      </div>
+      <div class="scale">
+        <svg class="scale-icon-32" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-a)"/>
+          <ellipse cx="48" cy="48" rx="14" ry="32" fill="url(#ember-glow-a)"/>
+          <path d="M 48 22 C 46 38, 50 58, 48 74" stroke="url(#ember-a)" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="scale-label">32</span>
+      </div>
+      <div class="scale">
+        <svg class="scale-icon-48" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-a)"/>
+          <ellipse cx="48" cy="48" rx="14" ry="32" fill="url(#ember-glow-a)"/>
+          <path d="M 48 20 C 45 32, 52 42, 46 52 C 50 62, 44 72, 48 76"
+                stroke="url(#ember-a)" stroke-width="2.4" fill="none"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="scale-label">48</span>
+      </div>
+    </div>
+
+    <!-- reasoning -->
+    <div class="reasoning">
+      <b>正在发生的瞬间。</b>茧壳仍在，但中央的裂缝已透出暖金色的光——
+      翅膀即将破出的那一秒。这是三个方向里<b>叙事张力最强</b>的，
+      logo 里含一个"未完成"的动作，暗示产品是用户记忆/图像正在蜕变的地方。
+      <div class="reasoning-tags">
+        <span class="tag">有张力</span>
+        <span class="tag">暖金签名色</span>
+        <span class="tag">中小尺寸需 fallback</span>
+      </div>
+    </div>
+
+    <!-- sidebar preview -->
+    <div class="sidebar-preview">
+      <div class="sidebar-preview-caption">in imago sidebar · 30×30</div>
+      <div class="sidebar-brand">
+        <svg class="sidebar-brand-icon" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-a)"/>
+          <ellipse cx="48" cy="48" rx="14" ry="32" fill="url(#ember-glow-a)"/>
+          <path d="M 48 20 C 45 32, 52 42, 46 52 C 50 62, 44 72, 48 76"
+                stroke="url(#ember-a)" stroke-width="2.4" fill="none"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand-col">
+          <div class="sidebar-brand-name">Imago</div>
+          <div class="sidebar-brand-sub">your private archive</div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+
+  <!-- ============ B · APERTURE ============ -->
+  <article class="variant">
+    <div class="variant-head">
+      <div class="variant-name">B · <em>Aperture</em></div>
+      <div class="variant-label">光圈 · 眼瞳 · 翅形</div>
+    </div>
+
+    <div class="hero-stage">
+      <svg class="hero-icon" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="shell-b" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#2d2d2d"/>
+            <stop offset="1" stop-color="#1a1a1a"/>
+          </linearGradient>
+          <radialGradient id="glow-b" cx="0.5" cy="0.5" r="0.35">
+            <stop offset="0" stop-color="#f5e6c3" stop-opacity="1"/>
+            <stop offset="0.55" stop-color="#d7b27a" stop-opacity="0.5"/>
+            <stop offset="1" stop-color="#a07944" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-b)"/>
+        <!-- vesica piscis (eye/wing/aperture) - horizontal orientation -->
+        <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z"
+              fill="none" stroke="#e8e6e2" stroke-width="1.6" stroke-linejoin="round"/>
+        <!-- secondary inner contour - gives wing-membrane hint -->
+        <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z"
+              fill="none" stroke="#e8e6e2" stroke-width="1" opacity="0.45"/>
+        <!-- central glow (pupil / light through aperture) -->
+        <circle cx="48" cy="48" r="9" fill="url(#glow-b)"/>
+        <circle cx="48" cy="48" r="2.2" fill="#f5e6c3"/>
+      </svg>
+    </div>
+
+    <div class="wordmark-stage">
+      <svg class="wordmark-icon" viewBox="0 0 96 96">
+        <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-b)"/>
+        <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z"
+              fill="none" stroke="#e8e6e2" stroke-width="1.6" stroke-linejoin="round"/>
+        <circle cx="48" cy="48" r="9" fill="url(#glow-b)"/>
+        <circle cx="48" cy="48" r="2.2" fill="#f5e6c3"/>
+      </svg>
+      <div class="wordmark-text"><em>imago</em></div>
+    </div>
+
+    <div class="scales">
+      <div class="scale">
+        <svg class="scale-icon-16" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-b)"/>
+          <path d="M 22 48 Q 48 26 74 48 Q 48 70 22 48 Z" fill="none" stroke="#e8e6e2" stroke-width="4"/>
+          <circle cx="48" cy="48" r="6" fill="#f5e6c3"/>
+        </svg>
+        <span class="scale-label">16</span>
+      </div>
+      <div class="scale">
+        <svg class="scale-icon-32" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-b)"/>
+          <path d="M 22 48 Q 48 24 74 48 Q 48 72 22 48 Z" fill="none" stroke="#e8e6e2" stroke-width="2.6"/>
+          <circle cx="48" cy="48" r="5" fill="url(#glow-b)"/>
+          <circle cx="48" cy="48" r="1.8" fill="#f5e6c3"/>
+        </svg>
+        <span class="scale-label">32</span>
+      </div>
+      <div class="scale">
+        <svg class="scale-icon-48" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-b)"/>
+          <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" fill="none" stroke="#e8e6e2" stroke-width="1.8"/>
+          <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z" fill="none" stroke="#e8e6e2" stroke-width="1.1" opacity="0.45"/>
+          <circle cx="48" cy="48" r="9" fill="url(#glow-b)"/>
+          <circle cx="48" cy="48" r="2.2" fill="#f5e6c3"/>
+        </svg>
+        <span class="scale-label">48</span>
+      </div>
+    </div>
+
+    <div class="reasoning">
+      <b>三重双关。</b>杏仁形是相机光圈（<em>图像</em>）、蝴蝶翅膀轮廓（<em>蜕变</em>）、
+      睁开的眼瞳（<em>看见/imago 在拉丁词根里的"像"</em>）。一个符号三层词义叠加，
+      也是三个方向里<b>概念密度最大</b>的。缩到 16 也能读，因为结构对称。
+      <div class="reasoning-tags">
+        <span class="tag">概念最深</span>
+        <span class="tag">对称抗缩</span>
+        <span class="tag">最通用</span>
+      </div>
+    </div>
+
+    <div class="sidebar-preview">
+      <div class="sidebar-preview-caption">in imago sidebar · 30×30</div>
+      <div class="sidebar-brand">
+        <svg class="sidebar-brand-icon" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-b)"/>
+          <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" fill="none" stroke="#e8e6e2" stroke-width="2.2"/>
+          <circle cx="48" cy="48" r="7" fill="url(#glow-b)"/>
+          <circle cx="48" cy="48" r="2" fill="#f5e6c3"/>
+        </svg>
+        <div class="sidebar-brand-col">
+          <div class="sidebar-brand-name">Imago</div>
+          <div class="sidebar-brand-sub">your private archive</div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+
+  <!-- ============ C · EMERGE ============ -->
+  <article class="variant">
+    <div class="variant-head">
+      <div class="variant-name">C · <em>Emerge</em></div>
+      <div class="variant-label">显露 · 茧 · 初生的翅</div>
+    </div>
+
+    <div class="hero-stage">
+      <svg class="hero-icon" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="shell-c" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#2d2d2d"/>
+            <stop offset="1" stop-color="#1a1a1a"/>
+          </linearGradient>
+          <linearGradient id="cocoon-c" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#e8d9c4" stop-opacity="0.85"/>
+            <stop offset="1" stop-color="#e8d9c4" stop-opacity="0.55"/>
+          </linearGradient>
+        </defs>
+        <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-c)"/>
+        <!-- cocoon: vertical capsule -->
+        <rect x="38" y="24" width="20" height="48" rx="10"
+              fill="none" stroke="url(#cocoon-c)" stroke-width="1.8"/>
+        <!-- two horizontal hairline "wings" emerging from mid sides -->
+        <line x1="20" y1="48" x2="36" y2="48" stroke="#e8d9c4" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+        <line x1="60" y1="48" x2="76" y2="48" stroke="#e8d9c4" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+        <!-- tiny dot on cocoon midline (seam) -->
+        <circle cx="48" cy="48" r="1.1" fill="#e8d9c4"/>
+      </svg>
+    </div>
+
+    <div class="wordmark-stage">
+      <svg class="wordmark-icon" viewBox="0 0 96 96">
+        <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-c)"/>
+        <rect x="38" y="24" width="20" height="48" rx="10" fill="none" stroke="url(#cocoon-c)" stroke-width="1.8"/>
+        <line x1="20" y1="48" x2="36" y2="48" stroke="#e8d9c4" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+        <line x1="60" y1="48" x2="76" y2="48" stroke="#e8d9c4" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+        <circle cx="48" cy="48" r="1.1" fill="#e8d9c4"/>
+      </svg>
+      <div class="wordmark-text"><em>imago</em></div>
+    </div>
+
+    <div class="scales">
+      <div class="scale">
+        <svg class="scale-icon-16" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-c)"/>
+          <rect x="36" y="24" width="24" height="48" rx="12" fill="none" stroke="#e8d9c4" stroke-width="4"/>
+        </svg>
+        <span class="scale-label">16</span>
+      </div>
+      <div class="scale">
+        <svg class="scale-icon-32" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-c)"/>
+          <rect x="38" y="24" width="20" height="48" rx="10" fill="none" stroke="#e8d9c4" stroke-width="2.6"/>
+          <line x1="24" y1="48" x2="36" y2="48" stroke="#e8d9c4" stroke-width="2.2" stroke-linecap="round"/>
+          <line x1="60" y1="48" x2="72" y2="48" stroke="#e8d9c4" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+        <span class="scale-label">32</span>
+      </div>
+      <div class="scale">
+        <svg class="scale-icon-48" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-c)"/>
+          <rect x="38" y="24" width="20" height="48" rx="10" fill="none" stroke="url(#cocoon-c)" stroke-width="1.8"/>
+          <line x1="20" y1="48" x2="36" y2="48" stroke="#e8d9c4" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+          <line x1="60" y1="48" x2="76" y2="48" stroke="#e8d9c4" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
+        </svg>
+        <span class="scale-label">48</span>
+      </div>
+    </div>
+
+    <div class="reasoning">
+      <b>最克制、最收藏家级。</b>中央的茧是纵向胶囊，两侧各一道 hairline
+      是<em>刚刚显露的翅膀信号</em>——蛹还没打开，但蜕变已经在发生。整图只有
+      墨色 + 一个柔和的暖米色，呼应 sidebar 的 <code>#f7f6f5</code>。
+      像日式家纹或植物学图鉴里那种<b>需要凝视才读懂</b>的符号。
+      <div class="reasoning-tags">
+        <span class="tag">最安静</span>
+        <span class="tag">归档气质</span>
+        <span class="tag">暖米呼应 sidebar</span>
+      </div>
+    </div>
+
+    <div class="sidebar-preview">
+      <div class="sidebar-preview-caption">in imago sidebar · 30×30</div>
+      <div class="sidebar-brand">
+        <svg class="sidebar-brand-icon" viewBox="0 0 96 96">
+          <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#shell-c)"/>
+          <rect x="38" y="24" width="20" height="48" rx="10" fill="none" stroke="#e8d9c4" stroke-width="2.4"/>
+          <line x1="22" y1="48" x2="36" y2="48" stroke="#e8d9c4" stroke-width="2" stroke-linecap="round"/>
+          <line x1="60" y1="48" x2="74" y2="48" stroke="#e8d9c4" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="sidebar-brand-col">
+          <div class="sidebar-brand-name">Imago</div>
+          <div class="sidebar-brand-sub">your private archive</div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+</section>
+
+<footer>
+  <div>
+    <h3>shared grammar (三个方向都遵守)</h3>
+    <p><b>外形：</b>88×88 圆角方块，<code>rx=22</code>（~25% radius）——比现有 logo 的 9/30 略大，在小尺寸下更不像 app icon 里的小方块，更像"收藏品盒子"。</p>
+    <p><b>色彩：</b>外壳用 <code>#2d2d2d → #1a1a1a</code> 纵向渐变（延续现有 logo 的墨渐变）；签名暖色只用在一处（裂缝/瞳/翅线），不扩散。</p>
+    <p><b>字体：</b>wordmark 用 Newsreader 斜体，和当前产品的 Inter 形成"标题衬线 + UI 无衬线"的经典对比——保留仪式感。</p>
+  </div>
+  <div>
+    <h3>junior designer · next step</h3>
+    <p>选定方向后（A / B / C / mix 都可以），我会做 <b>full pass</b>：</p>
+    <p>— SVG 源文件（可缩放、可改色）· <code>logo.svg</code> + <code>logo-mono.svg</code></p>
+    <p>— <b>Favicon 专用版本</b>（16×16 / 32×32 像素完美对齐）· <code>favicon.ico</code></p>
+    <p>— <b>社交/OG 图</b>（1024×1024 + 1200×630 ratio）</p>
+    <p>— <b>应用到 Sidebar</b>（替换 <code>Sidebar.tsx</code> 第 64-80 行那个占位方块）</p>
+    <p><b>也可以说 mix</b>：比如 "要 B 的概念 + C 的色温"、"A 但去掉渐变"——告诉我就行。</p>
+  </div>
+</footer>
+
+</body>
+</html>

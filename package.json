@@ -1,0 +1,33 @@
+{
+  "name": "imago",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n vite,worker -c cyan,magenta \"npm run dev:vite\" \"npm run dev:worker\"",
+    "dev:vite": "vite",
+    "dev:worker": "wrangler dev",
+    "build": "vite build",
+    "deploy": "npm run build && wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply imago --local",
+    "db:migrate": "wrangler d1 migrations apply imago --remote",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.6.14",
+    "nanoid": "^5.0.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "swr": "^2.2.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "@types/node": "^25.6.0",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
+    "wrangler": "^3.99.0"
+  }
+}

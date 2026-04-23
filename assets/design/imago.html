@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imago · 私人图床</title>
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #ffffff;
+      --sidebar-bg:      #f7f6f5;
+      --hover-bg:        rgba(55, 53, 47, 0.08);
+      --active-bg:       rgba(55, 53, 47, 0.11);
+      --border:          rgba(55, 53, 47, 0.09);
+      --border-mid:      rgba(55, 53, 47, 0.16);
+      --text-1:          #37352f;
+      --text-2:          #787774;
+      --text-3:          #acaba8;
+      --accent:          #2383e2;
+      --accent-bg:       rgba(35, 131, 226, 0.08);
+      --success:         #0f7b6c;
+      --danger:          #d44c47;
+      --shadow-sm:       0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:       0 4px 16px rgba(0,0,0,.09), 0 1px 4px rgba(0,0,0,.05);
+      --shadow-xl:       0 20px 60px rgba(0,0,0,.14), 0 6px 20px rgba(0,0,0,.06);
+      --r:               6px;
+      --sidebar:         248px;
+      --detail:          284px;
+    }
+
+    html, body, #root { height: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text-1);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    #root { display: flex; overflow: hidden; }
+
+    ::-webkit-scrollbar        { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track  { background: transparent; }
+    ::-webkit-scrollbar-thumb  { background: rgba(55,53,47,.18); border-radius: 3px; }
+
+    input, button { font-family: inherit; }
+
+    @keyframes fadeIn  { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulse   { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback, useMemo } = React;
+
+// ─── Mock data ────────────────────────────────────────────────────────────────
+
+const SEEDS = [10,22,37,44,55,68,71,83,96,107,112,124,135,148,156,163,174,189,191,202,213,220,232,245,257,261,278,290];
+const NAMES = ['screenshot','design','photo','banner','cover','thumbnail','mockup','export','render','wallpaper'];
+const EXTS  = ['png','jpg','jpg','webp','png'];
+const ALBUMS_DEF = [
+  { id: 'screenshots', label: '截图',  count: 9  },
+  { id: 'design',      label: '设计稿', count: 11 },
+  { id: 'photos',      label: '照片',  count: 8  },
+];
+
+const IMAGES = SEEDS.map((s, i) => ({
+  id: i + 1,
+  seed: s,
+  name: `${NAMES[i % NAMES.length]}-${String(i + 1).padStart(3, '0')}.${EXTS[i % EXTS.length]}`,
+  size: `${(Math.random() * 7.5 + 0.3).toFixed(1)} MB`,
+  w: [1920, 1280, 800, 2560, 1440, 1080][i % 6],
+  h: [1080, 720, 600, 1440, 900, 1920][i % 6],
+  date: `2026-0${Math.min(4, Math.floor(i / 7) + 1)}-${String((i % 28) + 1).padStart(2, '0')}`,
+  url: `https://picsum.photos/seed/${s}/960/640`,
+  thumb: `https://picsum.photos/seed/${s}/400/300`,
+  album: ALBUMS_DEF[i % 3].id,
+  public: i % 6 === 0,
+  starred: i % 9 === 0,
+  link: `https://img.imago.app/p/${Math.random().toString(36).slice(2, 12)}`,
+}));
+
+// ─── Lucide-style thin SVG icons ──────────────────────────────────────────────
+
+const PATHS = {
+  upload:   ['M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4','M17 8l-5-5-5 5','M12 3v12'],
+  grid2:    ['M3 3h7v7H3z','M14 3h7v7h-7z','M3 14h7v7H3z','M14 14h7v7h-7z'],
+  rows:     ['M3 5h18','M3 10h18','M3 15h18','M3 20h18'],
+  search:   ['M21 21l-5.2-5.2','circle:cx=10cy=10r=7'],
+  copy:     ['M8 4v12a1 1 0 001 1h9a1 1 0 001-1V8l-5-4H8z','M11 4v4h5'],
+  download: ['M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4','M7 10l5 5 5-5','M12 15V3'],
+  trash:    ['M3 6h18','M8 6V4h8v2','M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6'],
+  star:     ['M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z'],
+  link2:    ['M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71','M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71'],
+  settings: ['circle:cx=12cy=12r=3','M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z'],
+  close:    ['M18 6L6 18','M6 6l12 12'],
+  check:    ['M20 6L9 17l-5-5'],
+  plus:     ['M12 5v14','M5 12h14'],
+  folder:   ['M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z'],
+  image:    ['rect:x=3y=3w=18h=18rx=2ry=2','circle:cx=8.5cy=8.5r=1.5','M21 15l-5-5L5 21'],
+  globe:    ['circle:cx=12cy=12r=10','M2 12h20','M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z'],
+  lock:     ['rect:x=3y=11w=18h=11rx=2ry=2','M7 11V7a5 5 0 0110 0v4'],
+  external: ['M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6','M15 3h6v6','M10 14L21 3'],
+  chevronR: ['M9 18l6-6-6-6'],
+  chevronD: ['M6 9l6 6 6-6'],
+  ellipsis: ['circle:cx=5cy=12r=1','circle:cx=12cy=12r=1','circle:cx=19cy=12r=1'],
+  warning:  ['M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z','M12 9v4','M12 17h.01'],
+  sparkle:  ['M12 3l1.09 3.36L16.5 7.5l-3.41 1.14L12 12l-1.09-3.36L7.5 7.5l3.41-1.14z','M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5z','M19 11l.4 1.2 1.2.4-1.2.4-.4 1.2-.4-1.2-1.2-.4 1.2-.4z'],
+};
+
+const parseAttrs = (s) => {
+  const attrs = {};
+  for (const [, k, v] of s.matchAll(/([a-z]+)=(-?[\d.]+)/g)) attrs[k] = +v;
+  return attrs;
+};
+
+const Ic = ({ n, size = 16, color, style: sx }) => {
+  const els = (PATHS[n] || []).map((d, i) => {
+    if (d.startsWith('circle:')) {
+      const p = parseAttrs(d.slice(7));
+      return <circle key={i} cx={p.cx} cy={p.cy} r={p.r} />;
+    }
+    if (d.startsWith('rect:')) {
+      const p = parseAttrs(d.slice(5));
+      return <rect key={i} x={p.x} y={p.y} width={p.w} height={p.h} rx={p.rx} ry={p.ry} />;
+    }
+    return <path key={i} d={d} />;
+  });
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 24 24"
+      fill="none" stroke={color || 'currentColor'}
+      strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
+      style={{ flexShrink: 0, display: 'block', ...sx }}
+    >{els}</svg>
+  );
+};
+
+// ─── Primitive components ─────────────────────────────────────────────────────
+
+const Btn = ({ children, variant = 'ghost', size = 'md', icon, onClick, style: sx, disabled }) => {
+  const [hov, setH] = useState(false);
+  const pad = size === 'sm' ? '5px 10px' : size === 'lg' ? '9px 18px' : '6px 13px';
+  const fs  = size === 'sm' ? 12 : size === 'lg' ? 14 : 13;
+  const ic  = size === 'sm' ? 13 : 14;
+  const bases = {
+    ghost:   { bg: hov ? 'var(--hover-bg)'  : 'transparent', clr: 'var(--text-1)', border: 'none' },
+    outline: { bg: hov ? 'var(--hover-bg)'  : 'transparent', clr: 'var(--text-1)', border: '1px solid var(--border-mid)' },
+    solid:   { bg: hov ? '#1a1a1a'           : '#2d2d2d',     clr: '#fff',           border: 'none' },
+    accent:  { bg: hov ? '#1870c8'           : 'var(--accent)', clr: '#fff',         border: 'none' },
+    danger:  { bg: hov ? '#b83330'           : 'var(--danger)', clr: '#fff',         border: 'none' },
+  };
+  const v = bases[variant] || bases.ghost;
+  return (
+    <button
+      disabled={disabled}
+      onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      onClick={onClick}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        padding: pad, fontSize: fs, fontWeight: 500, lineHeight: 1,
+        borderRadius: 'var(--r)', cursor: disabled ? 'not-allowed' : 'pointer',
+        background: v.bg, color: v.clr, border: v.border,
+        transition: 'background .1s, color .1s', outline: 'none',
+        opacity: disabled ? .5 : 1, ...sx,
+      }}
+    >
+      {icon && <Ic n={icon} size={ic} />}
+      {children}
+    </button>
+  );
+};
+
+const Chip = ({ label, active, onClick }) => {
+  const [hov, setH] = useState(false);
+  return (
+    <button
+      onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      onClick={onClick}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        padding: '3px 10px', fontSize: 12, fontWeight: active ? 500 : 400,
+        borderRadius: 100, border: 'none', cursor: 'pointer',
+        background: active ? 'var(--text-1)' : hov ? 'var(--hover-bg)' : 'transparent',
+        color: active ? '#fff' : 'var(--text-2)',
+        transition: 'all .12s',
+      }}
+    >{label}</button>
+  );
+};
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
+const Sidebar = ({ view, album, onNav, onUpload }) => {
+  const [hov, setH] = useState(null);
+  const used = 2.4, total = 10;
+
+  const navSection = [
+    { id: 'all',       label: '全部图片',   icon: 'image',    count: IMAGES.length },
+    { id: 'starred',   label: '已收藏',     icon: 'star',     count: IMAGES.filter(i => i.starred).length },
+    { id: 'recent',    label: '最近上传',   icon: 'sparkle',  count: 7 },
+    { id: 'trash',     label: '回收站',     icon: 'trash',    count: 2 },
+  ];
+
+  const isActive = (id) => view === id || album === id;
+
+  return (
+    <aside style={{
+      width: 'var(--sidebar)', minWidth: 'var(--sidebar)',
+      background: 'var(--sidebar-bg)',
+      borderRight: '1px solid var(--border)',
+      display: 'flex', flexDirection: 'column',
+      height: '100vh', overflow: 'hidden',
+      userSelect: 'none',
+    }}>
+      {/* Brand */}
+      <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          width: 30, height: 30, borderRadius: 9,
+          background: 'linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 2px 6px rgba(0,0,0,.2)',
+          flexShrink: 0,
+        }}>
+          <span style={{ color: '#fff', fontSize: 14, fontWeight: 700, letterSpacing: -1, lineHeight: 1 }}>i</span>
+        </div>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-.01em' }}>Imago</div>
+          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>私人图床</div>
+        </div>
+        <button
+          onClick={() => onNav('settings')}
+          style={{
+            marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--text-3)', padding: 5, borderRadius: 5, display: 'flex',
+          }}
+          title="设置"
+        >
+          <Ic n="settings" size={14} />
+        </button>
+      </div>
+
+      {/* Upload CTA */}
+      <div style={{ padding: '2px 12px 8px' }}>
+        <button
+          onClick={onUpload}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            padding: '8px 12px', background: 'var(--text-1)', color: '#fff',
+            border: 'none', borderRadius: 'var(--r)', cursor: 'pointer',
+            fontSize: 13, fontWeight: 500, transition: 'opacity .12s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '.88'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        >
+          <Ic n="upload" size={14} color="#fff" />
+          上传图片
+        </button>
+      </div>
+
+      {/* Search */}
+      <div style={{ padding: '0 10px 6px' }}>
+        <label style={{
+          display: 'flex', alignItems: 'center', gap: 7,
+          background: 'rgba(255,255,255,.7)', border: '1px solid var(--border)',
+          borderRadius: 'var(--r)', padding: '6px 10px',
+          cursor: 'text',
+        }}>
+          <Ic n="search" size={13} color="var(--text-3)" />
+          <input
+            placeholder="搜索图片..."
+            style={{
+              border: 'none', outline: 'none', background: 'transparent',
+              fontSize: 12, color: 'var(--text-1)', width: '100%',
+            }}
+          />
+        </label>
+      </div>
+
+      <div style={{ height: 1, background: 'var(--border)', margin: '2px 12px 6px' }} />
+
+      {/* Nav */}
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '0 8px' }}>
+        <SectionLabel>浏览</SectionLabel>
+        {navSection.map(item => (
+          <NavRow
+            key={item.id}
+            active={isActive(item.id)}
+            hovered={hov === item.id}
+            onEnter={() => setH(item.id)}
+            onLeave={() => setH(null)}
+            onClick={() => onNav(item.id)}
+            icon={item.icon}
+            count={item.count}
+          >
+            {item.label}
+          </NavRow>
+        ))}
+
+        <div style={{ height: 1, background: 'var(--border)', margin: '8px 4px' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px 2px' }}>
+          <SectionLabel style={{ margin: 0 }}>相册</SectionLabel>
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 3, borderRadius: 4, display: 'flex' }}>
+            <Ic n="plus" size={12} />
+          </button>
+        </div>
+
+        {ALBUMS_DEF.map(alb => (
+          <NavRow
+            key={alb.id}
+            active={isActive(alb.id)}
+            hovered={hov === alb.id}
+            onEnter={() => setH(alb.id)}
+            onLeave={() => setH(null)}
+            onClick={() => onNav(alb.id, alb.label)}
+            icon="folder"
+            count={alb.count}
+          >
+            {alb.label}
+          </NavRow>
+        ))}
+      </nav>
+
+      {/* Storage */}
+      <div style={{ padding: '12px 16px 14px', borderTop: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 500 }}>存储空间</span>
+          <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{used} GB / {total} GB</span>
+        </div>
+        <div style={{ height: 3, background: 'rgba(55,53,47,.12)', borderRadius: 2, overflow: 'hidden' }}>
+          <div style={{
+            width: `${used / total * 100}%`, height: '100%',
+            background: 'var(--text-1)', borderRadius: 2,
+          }} />
+        </div>
+        <div style={{ marginTop: 7, fontSize: 11, color: 'var(--text-3)' }}>
+          剩余 {total - used} GB ·{' '}
+          <span style={{ color: 'var(--accent)', cursor: 'pointer' }}>升级空间</span>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+const SectionLabel = ({ children, style: sx }) => (
+  <div style={{
+    fontSize: 10.5, fontWeight: 600, color: 'var(--text-3)',
+    letterSpacing: '.06em', textTransform: 'uppercase',
+    padding: '6px 8px 3px', ...sx,
+  }}>{children}</div>
+);
+
+const NavRow = ({ children, active, hovered, onEnter, onLeave, onClick, icon, count }) => (
+  <button
+    onMouseEnter={onEnter} onMouseLeave={onLeave} onClick={onClick}
+    style={{
+      width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+      padding: '5px 8px', borderRadius: 5, cursor: 'pointer',
+      background: active ? 'var(--active-bg)' : hovered ? 'var(--hover-bg)' : 'transparent',
+      border: 'none', textAlign: 'left',
+      color: active ? 'var(--text-1)' : 'var(--text-2)',
+      fontSize: 13, fontWeight: active ? 500 : 400,
+      transition: 'background .08s',
+    }}
+  >
+    <Ic n={icon} size={14} />
+    <span style={{ flex: 1 }}>{children}</span>
+    {count !== undefined && (
+      <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{count}</span>
+    )}
+  </button>
+);
+
+// ─── Top bar ──────────────────────────────────────────────────────────────────
+
+const TopBar = ({ title, count, viewMode, setViewMode, sortBy, setSortBy, selected, onClearSel, onBulkDelete, onBulkCopy }) => {
+  const [sortOpen, setSortOpen] = useState(false);
+  const sorts = [
+    { id: 'date', label: '上传时间' },
+    { id: 'name', label: '文件名' },
+    { id: 'size', label: '文件大小' },
+  ];
+  return (
+    <div style={{
+      borderBottom: '1px solid var(--border)',
+      flexShrink: 0,
+    }}>
+      {/* Main topbar */}
+      <div style={{
+        height: 50, padding: '0 24px',
+        display: 'flex', alignItems: 'center', gap: 14,
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-.01em' }}>{title}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>{count} 张图片</div>
+        </div>
+
+        {/* View mode toggle */}
+        <div style={{
+          display: 'flex', padding: 3, gap: 2,
+          background: 'var(--sidebar-bg)', borderRadius: 7,
+          border: '1px solid var(--border)',
+        }}>
+          {[['grid2', 'grid'], ['rows', 'list']].map(([ic, mode]) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              style={{
+                padding: '4px 7px', border: 'none', cursor: 'pointer',
+                borderRadius: 4, display: 'flex', alignItems: 'center',
+                background: viewMode === mode ? '#fff' : 'transparent',
+                color: viewMode === mode ? 'var(--text-1)' : 'var(--text-3)',
+                boxShadow: viewMode === mode ? 'var(--shadow-sm)' : 'none',
+                transition: 'all .1s',
+              }}
+            >
+              <Ic n={ic} size={14} />
+            </button>
+          ))}
+        </div>
+
+        {/* Sort dropdown */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setSortOpen(v => !v)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '5px 10px', fontSize: 12, color: 'var(--text-2)',
+              background: sortOpen ? 'var(--hover-bg)' : 'transparent',
+              border: '1px solid var(--border)', borderRadius: 'var(--r)',
+              cursor: 'pointer', transition: 'background .1s',
+            }}
+          >
+            <span>{sorts.find(s => s.id === sortBy)?.label}</span>
+            <Ic n="chevronD" size={12} />
+          </button>
+          {sortOpen && (
+            <div style={{
+              position: 'absolute', right: 0, top: 'calc(100% + 4px)',
+              background: '#fff', border: '1px solid var(--border)',
+              borderRadius: 8, boxShadow: 'var(--shadow-md)',
+              padding: 4, minWidth: 120, zIndex: 50,
+              animation: 'fadeIn .1s ease',
+            }}>
+              {sorts.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => { setSortBy(s.id); setSortOpen(false); }}
+                  style={{
+                    width: '100%', padding: '7px 12px', fontSize: 13,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    borderRadius: 5, color: 'var(--text-1)',
+                    fontWeight: sortBy === s.id ? 500 : 400,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  {s.label}
+                  {sortBy === s.id && <Ic n="check" size={13} color="var(--accent)" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Selection bar */}
+      {selected.length > 0 && (
+        <div style={{
+          height: 40, padding: '0 24px',
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: 'var(--accent-bg)',
+          borderTop: '1px solid rgba(35,131,226,.12)',
+          animation: 'fadeIn .15s ease',
+        }}>
+          <span style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--accent)' }}>
+            已选 {selected.length} 张
+          </span>
+          <span
+            onClick={onClearSel}
+            style={{ fontSize: 12, color: 'var(--text-3)', cursor: 'pointer', marginLeft: 2 }}
+          >
+            取消
+          </span>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+            <Btn variant="outline" size="sm" icon="link2" onClick={onBulkCopy}>复制链接</Btn>
+            <Btn variant="outline" size="sm" icon="download">批量下载</Btn>
+            <Btn variant="danger" size="sm" icon="trash" onClick={onBulkDelete}>删除</Btn>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Image Card ───────────────────────────────────────────────────────────────
+
+const ImageCard = ({ img, selected, onSelect, onOpen }) => {
+  const [hov, setH] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = (e) => {
+    e.stopPropagation();
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+
+  return (
+    <div
+      onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      onClick={() => onOpen(img)}
+      style={{
+        position: 'relative', borderRadius: 8, overflow: 'hidden',
+        background: '#eeede9', cursor: 'pointer',
+        outline: selected ? '2px solid var(--accent)' : '2px solid transparent',
+        outlineOffset: -2,
+        transform: hov && !selected ? 'translateY(-2px)' : 'none',
+        boxShadow: hov ? 'var(--shadow-md)' : 'var(--shadow-sm)',
+        transition: 'transform .15s, box-shadow .15s, outline .1s',
+        aspectRatio: '4/3',
+      }}
+    >
+      <img
+        src={img.thumb}
+        alt={img.name}
+        loading="lazy"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+
+      {/* Gradient overlay */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(to bottom, rgba(0,0,0,.4) 0%, transparent 35%, transparent 55%, rgba(0,0,0,.55) 100%)',
+        opacity: hov || selected ? 1 : 0,
+        transition: 'opacity .15s',
+      }} />
+
+      {/* Checkbox */}
+      <div style={{ position: 'absolute', top: 8, left: 8, opacity: hov || selected ? 1 : 0, transition: 'opacity .15s' }}>
+        <div
+          onClick={e => { e.stopPropagation(); onSelect(img.id); }}
+          style={{
+            width: 19, height: 19, borderRadius: 5, cursor: 'pointer',
+            background: selected ? 'var(--accent)' : 'rgba(255,255,255,.88)',
+            border: selected ? 'none' : '1.5px solid rgba(255,255,255,.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all .12s',
+          }}
+        >
+          {selected && <Ic n="check" size={11} color="#fff" />}
+        </div>
+      </div>
+
+      {/* Badges top right */}
+      <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4 }}>
+        {img.starred && (
+          <div style={{
+            background: 'rgba(255,255,255,.15)', backdropFilter: 'blur(6px)',
+            borderRadius: 4, padding: '2px 5px', display: 'flex', alignItems: 'center',
+          }}>
+            <Ic n="star" size={10} color="#f5c542" />
+          </div>
+        )}
+        {img.public && (
+          <div style={{
+            background: 'rgba(255,255,255,.15)', backdropFilter: 'blur(6px)',
+            borderRadius: 4, padding: '2px 6px', display: 'flex', alignItems: 'center', gap: 3,
+          }}>
+            <Ic n="globe" size={9} color="rgba(255,255,255,.9)" />
+            <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,.9)', fontWeight: 500 }}>公开</span>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom bar */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        padding: '6px 8px 8px',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+        opacity: hov || selected ? 1 : 0,
+        transition: 'opacity .15s',
+      }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{
+            fontSize: 11, color: '#fff', fontWeight: 500,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            maxWidth: 120, lineHeight: 1.3,
+          }}>{img.name}</div>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,.65)', marginTop: 1 }}>{img.size}</div>
+        </div>
+        <button
+          onClick={copyLink}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            padding: '4px 8px', fontSize: 11, fontWeight: 500, fontFamily: 'inherit',
+            background: copied ? 'rgba(255,255,255,.92)' : 'rgba(255,255,255,.18)',
+            backdropFilter: 'blur(8px)',
+            color: copied ? 'var(--success)' : '#fff',
+            border: 'none', borderRadius: 4, cursor: 'pointer',
+            transition: 'all .15s', flexShrink: 0,
+          }}
+        >
+          <Ic n={copied ? 'check' : 'copy'} size={10} color={copied ? 'var(--success)' : '#fff'} />
+          {copied ? '已复制' : '复制链接'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── List Row ─────────────────────────────────────────────────────────────────
+
+const ListRow = ({ img, selected, onSelect, onOpen }) => {
+  const [hov, setH] = useState(false);
+  const [copied, setCopied] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      onClick={() => onOpen(img)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '8px 12px', borderRadius: 7, cursor: 'pointer',
+        background: selected ? 'var(--accent-bg)' : hov ? 'var(--hover-bg)' : 'transparent',
+        transition: 'background .08s',
+        outline: selected ? '1px solid rgba(35,131,226,.25)' : 'none',
+      }}
+    >
+      {/* Thumb */}
+      <div style={{ width: 42, height: 32, borderRadius: 5, overflow: 'hidden', flexShrink: 0, background: '#eeede9', position: 'relative' }}>
+        <img src={img.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div
+          onClick={e => { e.stopPropagation(); onSelect(img.id); }}
+          style={{
+            position: 'absolute', inset: 0,
+            background: hov || selected ? 'rgba(0,0,0,.35)' : 'transparent',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all .12s',
+          }}
+        >
+          {(hov || selected) && (
+            <div style={{
+              width: 16, height: 16, borderRadius: 4,
+              background: selected ? 'var(--accent)' : 'rgba(255,255,255,.88)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {selected && <Ic n="check" size={9} color="#fff" />}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Name */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{img.name}</div>
+        <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>
+          {img.w}×{img.h} · {img.size}
+        </div>
+      </div>
+
+      {/* Date */}
+      <div style={{ fontSize: 12, color: 'var(--text-3)', flexShrink: 0, width: 80, textAlign: 'right' }}>{img.date}</div>
+
+      {/* Badges */}
+      <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
+        {img.public && (
+          <span style={{ fontSize: 11, color: 'var(--text-2)', background: 'var(--hover-bg)', padding: '2px 7px', borderRadius: 100 }}>公开</span>
+        )}
+      </div>
+
+      {/* Copy */}
+      <button
+        onClick={e => { e.stopPropagation(); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+        style={{
+          padding: '4px 10px', fontSize: 11.5, fontWeight: 500, fontFamily: 'inherit',
+          background: copied ? 'rgba(15,123,108,.12)' : hov ? 'var(--active-bg)' : 'transparent',
+          color: copied ? 'var(--success)' : 'var(--text-2)',
+          border: '1px solid ' + (hov ? 'var(--border-mid)' : 'transparent'),
+          borderRadius: 5, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 5,
+          transition: 'all .12s', flexShrink: 0,
+          opacity: hov || copied ? 1 : 0,
+        }}
+      >
+        <Ic n={copied ? 'check' : 'copy'} size={12} />
+        {copied ? '已复制' : '复制'}
+      </button>
+    </div>
+  );
+};
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+const EmptyState = ({ title, desc, action, onAction }) => (
+  <div style={{
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    flex: 1, gap: 12, padding: 40, textAlign: 'center',
+  }}>
+    <div style={{
+      width: 52, height: 52, borderRadius: 14,
+      background: 'var(--sidebar-bg)', border: '1px solid var(--border)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <Ic n="image" size={22} color="var(--text-3)" />
+    </div>
+    <div>
+      <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 5 }}>{title}</div>
+      <div style={{ fontSize: 13, color: 'var(--text-3)', maxWidth: 240 }}>{desc}</div>
+    </div>
+    {action && <Btn variant="outline" icon="upload" onClick={onAction}>{action}</Btn>}
+  </div>
+);
+
+// ─── Detail Panel ─────────────────────────────────────────────────────────────
+
+const DetailPanel = ({ img, onClose }) => {
+  const [copied, setCopied] = useState(false);
+  const [tab, setTab] = useState('info');
+
+  const copyLink = () => { setCopied(true); setTimeout(() => setCopied(false), 2000); };
+
+  const meta = [
+    { k: '文件名', v: img.name },
+    { k: '尺寸',   v: `${img.w} × ${img.h} px` },
+    { k: '大小',   v: img.size },
+    { k: '格式',   v: img.name.split('.').pop().toUpperCase() },
+    { k: '上传于', v: img.date },
+    { k: '相册',   v: ALBUMS_DEF.find(a => a.id === img.album)?.label || '—' },
+  ];
+
+  return (
+    <div style={{
+      width: 'var(--detail)', minWidth: 'var(--detail)',
+      borderLeft: '1px solid var(--border)',
+      background: '#fff', display: 'flex', flexDirection: 'column',
+      height: '100vh', overflow: 'hidden',
+      animation: 'slideIn .18s ease',
+    }}>
+      {/* Header */}
+      <div style={{
+        height: 50, padding: '0 16px',
+        borderBottom: '1px solid var(--border)',
+        display: 'flex', alignItems: 'center', gap: 10,
+        flexShrink: 0,
+      }}>
+        <span style={{ fontSize: 13, fontWeight: 500, flex: 1 }}>图片详情</span>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 5, borderRadius: 4, display: 'flex' }}>
+          <Ic n="close" size={14} />
+        </button>
+      </div>
+
+      {/* Preview */}
+      <div style={{ aspectRatio: '4/3', background: '#eeede9', overflow: 'hidden', flexShrink: 0 }}>
+        <img src={img.url} alt={img.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
+
+      {/* Tabs */}
+      <div style={{
+        display: 'flex', padding: '6px 12px', gap: 2,
+        borderBottom: '1px solid var(--border)', flexShrink: 0,
+      }}>
+        {[['info', '信息'], ['link', '链接']].map(([id, label]) => (
+          <button
+            key={id} onClick={() => setTab(id)}
+            style={{
+              padding: '4px 12px', fontSize: 12.5, fontWeight: tab === id ? 500 : 400,
+              border: 'none', cursor: 'pointer', borderRadius: 5,
+              background: tab === id ? 'var(--active-bg)' : 'transparent',
+              color: tab === id ? 'var(--text-1)' : 'var(--text-2)',
+            }}
+          >{label}</button>
+        ))}
+      </div>
+
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {tab === 'info' && (
+          <div style={{ padding: 16 }}>
+            {/* Name */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, wordBreak: 'break-all', lineHeight: 1.5 }}>{img.name}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 3 }}>{img.date} 上传</div>
+            </div>
+
+            {/* Visibility */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px',
+              background: img.public ? 'rgba(35,131,226,.07)' : 'var(--sidebar-bg)',
+              borderRadius: 8, marginBottom: 16,
+              border: `1px solid ${img.public ? 'rgba(35,131,226,.18)' : 'var(--border)'}`,
+            }}>
+              <Ic n={img.public ? 'globe' : 'lock'} size={14} color={img.public ? 'var(--accent)' : 'var(--text-3)'} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 500, color: img.public ? 'var(--accent)' : 'var(--text-2)' }}>
+                  {img.public ? '公开访问' : '仅自己可见'}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>
+                  {img.public ? '任何人可通过链接查看' : '需要认证才能访问'}
+                </div>
+              </div>
+            </div>
+
+            {/* Meta grid */}
+            <div>
+              <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>文件信息</div>
+              {meta.map(({ k, v }) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{k}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-2)', maxWidth: 155, textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === 'link' && (
+          <div style={{ padding: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 10 }}>直链</div>
+
+            {/* Link box */}
+            <div style={{
+              background: 'var(--sidebar-bg)', border: '1px solid var(--border)',
+              borderRadius: 8, padding: '10px 12px', marginBottom: 10,
+              fontFamily: 'ui-monospace, "SF Mono", monospace',
+              fontSize: 11.5, color: 'var(--text-2)', wordBreak: 'break-all',
+              lineHeight: 1.5,
+            }}>{img.link}</div>
+
+            <Btn
+              variant={copied ? 'outline' : 'accent'}
+              icon={copied ? 'check' : 'copy'}
+              onClick={copyLink}
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              {copied ? '已复制到剪贴板' : '复制直链'}
+            </Btn>
+
+            {/* Embed formats */}
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 10 }}>嵌入格式</div>
+              {[
+                { label: 'HTML', code: `<img src="${img.link}" />` },
+                { label: 'Markdown', code: `![image](${img.link})` },
+                { label: 'BBCode', code: `[img]${img.link}[/img]` },
+              ].map(({ label, code }) => (
+                <div key={label} style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 4 }}>{label}</div>
+                  <div style={{
+                    background: 'var(--sidebar-bg)', border: '1px solid var(--border)',
+                    borderRadius: 5, padding: '7px 10px',
+                    fontFamily: 'ui-monospace, monospace', fontSize: 11,
+                    color: 'var(--text-2)', overflow: 'auto', whiteSpace: 'nowrap',
+                  }}>{code}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div style={{ padding: '10px 14px 14px', borderTop: '1px solid var(--border)', display: 'flex', gap: 7, flexShrink: 0 }}>
+        <Btn variant="outline" icon="download" style={{ flex: 1, justifyContent: 'center' }}>下载</Btn>
+        <Btn variant="outline" icon="external" style={{ flex: 1, justifyContent: 'center' }}>预览</Btn>
+        <Btn variant="ghost" icon="trash" style={{ color: 'var(--danger)' }} />
+      </div>
+    </div>
+  );
+};
+
+// ─── Upload modal ─────────────────────────────────────────────────────────────
+
+const UploadModal = ({ onClose }) => {
+  const [drag, setDrag] = useState(false);
+  const [phase, setPhase] = useState('idle'); // idle | uploading | done
+  const [progress, setProgress] = useState(0);
+
+  const simulate = () => {
+    setPhase('uploading');
+    let p = 0;
+    const t = setInterval(() => {
+      p += Math.random() * 18 + 3;
+      if (p >= 100) {
+        p = 100; clearInterval(t);
+        setPhase('done');
+        setTimeout(onClose, 700);
+      }
+      setProgress(Math.min(p, 100));
+    }, 120);
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 200,
+      background: 'rgba(0,0,0,.38)', backdropFilter: 'blur(3px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      animation: 'fadeIn .15s ease',
+    }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{
+        width: 500, background: '#fff', borderRadius: 14,
+        boxShadow: 'var(--shadow-xl)', overflow: 'hidden',
+        animation: 'fadeIn .18s ease',
+      }}>
+        {/* Header */}
+        <div style={{ padding: '18px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>上传图片</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>支持 PNG、JPG、WebP、GIF、SVG · 最大 20 MB</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 6, borderRadius: 6, display: 'flex' }}>
+            <Ic n="close" size={16} />
+          </button>
+        </div>
+
+        <div style={{ padding: 20 }}>
+          {phase === 'idle' && (
+            <>
+              {/* Drop zone */}
+              <div
+                onDragEnter={() => setDrag(true)}
+                onDragLeave={() => setDrag(false)}
+                onDrop={e => { e.preventDefault(); setDrag(false); simulate(); }}
+                onDragOver={e => e.preventDefault()}
+                onClick={simulate}
+                style={{
+                  border: `1.5px dashed ${drag ? 'var(--accent)' : 'rgba(55,53,47,.22)'}`,
+                  borderRadius: 10, padding: '38px 20px', textAlign: 'center',
+                  background: drag ? 'var(--accent-bg)' : 'var(--sidebar-bg)',
+                  cursor: 'pointer', transition: 'all .15s',
+                }}
+              >
+                <div style={{
+                  width: 50, height: 50, borderRadius: 13,
+                  background: drag ? 'var(--accent-bg)' : 'rgba(55,53,47,.06)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 14px',
+                  border: drag ? '1px solid rgba(35,131,226,.3)' : '1px solid var(--border)',
+                }}>
+                  <Ic n="upload" size={22} color={drag ? 'var(--accent)' : 'var(--text-2)'} />
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 5 }}>拖拽文件到此处</div>
+                <div style={{ fontSize: 12.5, color: 'var(--text-3)' }}>或 <span style={{ color: 'var(--accent)', fontWeight: 500 }}>点击选择文件</span></div>
+              </div>
+
+              {/* URL input */}
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 6, fontWeight: 500 }}>或粘贴图片 URL</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{
+                    flex: 1, display: 'flex', alignItems: 'center', gap: 8,
+                    border: '1px solid var(--border)', borderRadius: 'var(--r)',
+                    padding: '7px 12px', background: 'var(--sidebar-bg)',
+                  }}>
+                    <Ic n="link2" size={13} color="var(--text-3)" />
+                    <input placeholder="https://example.com/image.png" style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 13, color: 'var(--text-2)', width: '100%' }} />
+                  </div>
+                  <Btn variant="outline" size="md">获取</Btn>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <Btn variant="ghost" onClick={onClose}>取消</Btn>
+                <Btn variant="solid" icon="upload" onClick={simulate}>选择文件上传</Btn>
+              </div>
+            </>
+          )}
+
+          {phase === 'uploading' && (
+            <div style={{ padding: '10px 0 6px', textAlign: 'center' }}>
+              <div style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 18 }}>
+                正在上传 <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>design-screenshot.png</span>…
+              </div>
+              <div style={{ height: 4, background: 'rgba(55,53,47,.1)', borderRadius: 2, overflow: 'hidden', marginBottom: 10 }}>
+                <div style={{
+                  width: `${progress}%`, height: '100%',
+                  background: 'var(--text-1)', borderRadius: 2,
+                  transition: 'width .18s ease',
+                }} />
+              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{Math.floor(progress)}%</div>
+            </div>
+          )}
+
+          {phase === 'done' && (
+            <div style={{ padding: '18px 0', textAlign: 'center' }}>
+              <div style={{
+                width: 42, height: 42, borderRadius: 12,
+                background: 'rgba(15,123,108,.12)', margin: '0 auto 12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Ic n="check" size={20} color="var(--success)" />
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>上传成功</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Settings Panel ───────────────────────────────────────────────────────────
+
+const SettingsPanel = ({ onClose }) => (
+  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{
+      height: 50, padding: '0 24px', borderBottom: '1px solid var(--border)',
+      display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0,
+    }}>
+      <span style={{ fontSize: 14, fontWeight: 600 }}>设置</span>
+    </div>
+    <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px', maxWidth: 600 }}>
+      {[
+        { section: '账户', items: [
+          { label: '用户名', desc: '你的 Imago 账户名', value: 'liuguoli' },
+          { label: '邮箱', desc: '用于通知和登录', value: 'liuguoli@example.com' },
+        ]},
+        { section: '存储', items: [
+          { label: '存储套餐', desc: '当前套餐：免费 10 GB', action: '升级' },
+          { label: '自动压缩', desc: '上传时自动优化图片体积', toggle: true, on: true },
+          { label: 'WebP 转换', desc: '自动将 PNG/JPG 转换为 WebP', toggle: true, on: false },
+        ]},
+        { section: '隐私', items: [
+          { label: '默认可见性', desc: '新上传图片的默认访问权限', value: '仅自己' },
+          { label: '链接有效期', desc: '公开链接的默认有效时长', value: '永久' },
+        ]},
+      ].map(({ section, items }) => (
+        <div key={section} style={{ marginBottom: 36 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 12 }}>{section}</div>
+          {items.map(item => (
+            <div key={item.label} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 0', borderBottom: '1px solid var(--border)',
+            }}>
+              <div>
+                <div style={{ fontSize: 13.5, fontWeight: 500 }}>{item.label}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{item.desc}</div>
+              </div>
+              {item.toggle !== undefined ? (
+                <div style={{
+                  width: 36, height: 20, borderRadius: 10,
+                  background: item.on ? 'var(--text-1)' : 'rgba(55,53,47,.15)',
+                  position: 'relative', cursor: 'pointer', flexShrink: 0,
+                }}>
+                  <div style={{
+                    position: 'absolute', top: 2, left: item.on ? 18 : 2,
+                    width: 16, height: 16, borderRadius: '50%', background: '#fff',
+                    transition: 'left .15s', boxShadow: '0 1px 3px rgba(0,0,0,.2)',
+                  }} />
+                </div>
+              ) : item.action ? (
+                <Btn variant="outline" size="sm">{item.action}</Btn>
+              ) : (
+                <div style={{
+                  fontSize: 13, color: 'var(--text-2)', background: 'var(--sidebar-bg)',
+                  border: '1px solid var(--border)', borderRadius: 5,
+                  padding: '4px 10px', cursor: 'pointer',
+                }}>{item.value}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ─── Main gallery ─────────────────────────────────────────────────────────────
+
+const Gallery = ({ imgs, viewMode, onOpen, selected, onSelect, onUpload }) => {
+  if (imgs.length === 0) return <EmptyState title="还没有图片" desc="上传你的第一张图片，开始使用私人图床" action="上传图片" onAction={onUpload} />;
+
+  return (
+    <div style={{ flex: 1, overflow: 'auto', padding: 22 }}>
+      {viewMode === 'grid' ? (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+          gap: 12,
+        }}>
+          {imgs.map(img => (
+            <ImageCard key={img.id} img={img} selected={selected.includes(img.id)} onSelect={onSelect} onOpen={onOpen} />
+          ))}
+        </div>
+      ) : (
+        <div>
+          <div style={{ display: 'flex', padding: '0 12px 6px', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-3)', flex: 1, paddingLeft: 54 }}>文件名</span>
+            <span style={{ fontSize: 11, color: 'var(--text-3)', width: 80, textAlign: 'right' }}>上传时间</span>
+            <span style={{ fontSize: 11, color: 'var(--text-3)', width: 80, textAlign: 'center' }}>状态</span>
+            <span style={{ fontSize: 11, color: 'var(--text-3)', width: 60 }}></span>
+          </div>
+          {imgs.map(img => (
+            <ListRow key={img.id} img={img} selected={selected.includes(img.id)} onSelect={onSelect} onOpen={onOpen} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── App shell ────────────────────────────────────────────────────────────────
+
+const App = () => {
+  const [view, setView]           = useState('all');
+  const [albumLabel, setAlbumLbl] = useState('');
+  const [detail, setDetail]       = useState(null);
+  const [selected, setSelected]   = useState([]);
+  const [viewMode, setViewMode]   = useState('grid');
+  const [sortBy, setSortBy]       = useState('date');
+  const [showUpload, setUpload]   = useState(false);
+
+  const handleNav = (id, label) => {
+    setView(id); setDetail(null); setSelected([]);
+    setAlbumLbl(label || '');
+  };
+
+  const toggleSelect = (id) => {
+    setSelected(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const visibleImgs = useMemo(() => {
+    let imgs = IMAGES;
+    if (view === 'starred')    imgs = imgs.filter(i => i.starred);
+    else if (view === 'recent')imgs = imgs.filter((_, idx) => idx < 7);
+    else if (view === 'trash') imgs = [];
+    else if (view !== 'all' && view !== 'settings') imgs = imgs.filter(i => i.album === view);
+    return imgs;
+  }, [view]);
+
+  const navTitle = useMemo(() => {
+    if (view === 'all')     return '全部图片';
+    if (view === 'starred') return '已收藏';
+    if (view === 'recent')  return '最近上传';
+    if (view === 'trash')   return '回收站';
+    if (view === 'settings')return '设置';
+    return albumLabel;
+  }, [view, albumLabel]);
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <Sidebar
+        view={view} album={view}
+        onNav={handleNav}
+        onUpload={() => setUpload(true)}
+      />
+
+      {view === 'settings' ? (
+        <SettingsPanel onClose={() => setView('all')} />
+      ) : (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+          <TopBar
+            title={navTitle}
+            count={visibleImgs.length}
+            viewMode={viewMode} setViewMode={setViewMode}
+            sortBy={sortBy} setSortBy={setSortBy}
+            selected={selected}
+            onClearSel={() => setSelected([])}
+            onBulkDelete={() => setSelected([])}
+            onBulkCopy={() => {}}
+          />
+          <Gallery
+            imgs={visibleImgs} viewMode={viewMode}
+            onOpen={img => { setDetail(img); setSelected([]); }}
+            selected={selected} onSelect={toggleSelect}
+            onUpload={() => setUpload(true)}
+          />
+        </div>
+      )}
+
+      {detail && <DetailPanel img={detail} onClose={() => setDetail(null)} />}
+      {showUpload && <UploadModal onClose={() => setUpload(false)} />}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

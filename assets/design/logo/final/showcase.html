@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>imago · B · Aperture · final pass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --paper: #faf9f7;
+    --sidebar-bg: #f7f6f5;
+    --text-1: #37352f;
+    --text-2: #787774;
+    --text-3: #acaba8;
+    --border: rgba(55, 53, 47, 0.09);
+    --border-mid: rgba(55, 53, 47, 0.16);
+    --ink: #1a1a1a;
+    --glow: #f5e6c3;
+  }
+
+  html, body { min-height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-1);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+    padding: 56px 48px 96px;
+  }
+
+  /* ─────────  header  ───────── */
+  header { max-width: 1240px; margin: 0 auto 40px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-3); margin-bottom: 14px;
+  }
+  h1 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 400; font-size: 40px; line-height: 1.1;
+    letter-spacing: -0.02em; color: var(--text-1);
+    margin-bottom: 12px;
+  }
+  h1 em { font-style: italic; color: var(--text-2); }
+  .lede {
+    font-size: 15px; line-height: 1.6; color: var(--text-2);
+    max-width: 640px;
+  }
+  .lede b { color: var(--text-1); font-weight: 500; }
+  .lede code {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 13px; color: var(--text-1);
+    background: var(--bg); padding: 1px 6px; border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  /* ─────────  section  ───────── */
+  section { max-width: 1240px; margin: 0 auto 56px; }
+  .section-head {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'Newsreader', Georgia, serif; font-style: italic;
+    font-size: 22px; color: var(--text-3); font-weight: 400;
+  }
+  .section-title {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 24px; font-weight: 500; letter-spacing: -0.01em;
+  }
+  .section-sub {
+    font-size: 12px; color: var(--text-3); margin-left: auto;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  /* ─────────  Section 1: hero  ───────── */
+  .hero {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 64px 48px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 24px;
+  }
+  .hero-icon { width: 176px; height: 176px; display: block; }
+  .hero-wordmark {
+    font-family: 'Newsreader', Georgia, serif;
+    font-style: italic; font-weight: 500;
+    font-size: 64px; letter-spacing: -0.025em;
+    color: var(--text-1);
+  }
+  .hero-tagline {
+    font-size: 14px; color: var(--text-2); letter-spacing: 0.02em;
+    margin-top: -8px;
+  }
+
+  /* ─────────  Section 2: sizes ladder  ───────── */
+  .ladder {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 40px 48px;
+    display: flex; align-items: flex-end;
+    gap: 56px; justify-content: center;
+  }
+  .ladder-item { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .ladder-label {
+    font-size: 11px; color: var(--text-3);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    letter-spacing: 0.05em;
+  }
+  .ladder-label b { color: var(--text-1); font-weight: 500; }
+  .ladder svg { display: block; }
+
+  /* ─────────  Section 3: variants (dark/light/mono)  ───────── */
+  .grid-3 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  .var-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .var-stage {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 56px 20px;
+    min-height: 200px;
+  }
+  .var-stage.dark { background: #111; }
+  .var-stage.paper { background: var(--paper); }
+  .var-stage.white { background: #fff; }
+  .var-stage svg { width: 96px; height: 96px; display: block; }
+  .var-caption {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    font-size: 12px; color: var(--text-2);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .var-caption code {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 11px; color: var(--text-1);
+    background: var(--paper); padding: 2px 7px; border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  /* ─────────  Section 4: sidebar real integration  ───────── */
+  .sidebar-mock {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: grid; grid-template-columns: 248px 1fr;
+    height: 420px;
+  }
+  .sb-side {
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+  }
+  .sb-brand {
+    padding: 14px 16px 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sb-brand-icon { width: 30px; height: 30px; display: block; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,.22)); }
+  .sb-brand-name {
+    font-family: 'Newsreader', Georgia, serif;
+    font-style: italic; font-weight: 500;
+    font-size: 18px; letter-spacing: -0.015em;
+    color: var(--text-1);
+  }
+  .sb-items {
+    padding: 6px 10px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .sb-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 8px;
+    font-size: 13px; color: var(--text-1);
+    border-radius: 4px;
+    opacity: 0.85;
+  }
+  .sb-item.active { background: rgba(55,53,47,.08); opacity: 1; }
+  .sb-item-icon { width: 14px; height: 14px; color: var(--text-2); }
+  .sb-item-count { margin-left: auto; font-size: 11px; color: var(--text-3); font-feature-settings: 'tnum'; }
+  .sb-sep {
+    height: 1px; background: var(--border);
+    margin: 8px 14px;
+  }
+  .sb-section-head {
+    padding: 4px 18px;
+    font-size: 10px; color: var(--text-3);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .sb-main {
+    background: var(--bg);
+    padding: 14px 22px;
+    overflow: hidden;
+  }
+  .sb-topbar {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .sb-topbar-title { font-size: 14px; font-weight: 600; }
+  .sb-topbar-count { font-size: 12px; color: var(--text-3); }
+  .sb-topbar-spacer { flex: 1; }
+  .sb-upload {
+    padding: 5px 12px; background: var(--ink); color: #fff;
+    font-size: 12px; border-radius: 5px; font-weight: 500;
+  }
+  .gallery-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    margin-bottom: 6px;
+  }
+  .gallery-cell {
+    aspect-ratio: 1.35;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #cdbca0, #6e5e48);
+  }
+  .gallery-cell:nth-child(2) { background: linear-gradient(135deg, #4a5e7a, #1f2838); }
+  .gallery-cell:nth-child(3) { background: linear-gradient(160deg, #d0a89a, #7e4f3e); }
+  .gallery-cell:nth-child(4) { background: linear-gradient(120deg, #808b73, #3a4435); }
+  .gallery-cell:nth-child(5) { background: linear-gradient(150deg, #b89268, #5c4028); }
+  .gallery-cell:nth-child(6) { background: linear-gradient(135deg, #2c3d4a, #0f1a20); }
+  .gallery-cell:nth-child(7) { background: linear-gradient(120deg, #eee1c5, #a68a5b); }
+  .gallery-cell:nth-child(8) { background: linear-gradient(145deg, #5b6d72, #1f2b2e); }
+
+  /* ─────────  Section 5: OG preview card  ───────── */
+  .og-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .og-image { width: 100%; display: block; aspect-ratio: 1200 / 630; object-fit: cover; }
+  .og-meta {
+    padding: 18px 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .og-host { font-size: 13px; color: var(--text-2); }
+  .og-spec { font-size: 11px; color: var(--text-3); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.05em; }
+
+  /* ─────────  Section 6: browser tab favicon demo  ───────── */
+  .browser-chrome {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px 14px 8px 8px;
+    overflow: hidden;
+  }
+  .bc-tabs {
+    background: #e9e8e6;
+    padding: 8px 10px 0;
+    display: flex; gap: 4px;
+  }
+  .bc-tab {
+    padding: 8px 14px 9px;
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; color: var(--text-2);
+    border-radius: 8px 8px 0 0;
+    min-width: 180px; max-width: 220px;
+  }
+  .bc-tab.active { background: var(--bg); color: var(--text-1); font-weight: 500; }
+  .bc-tab svg { flex-shrink: 0; }
+  .bc-tab-close {
+    margin-left: auto; width: 14px; height: 14px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--text-3); line-height: 1;
+  }
+  .bc-url {
+    padding: 10px 16px;
+    background: var(--paper);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--text-2);
+  }
+  .bc-content {
+    padding: 30px 24px; background: var(--bg);
+    color: var(--text-3); font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    letter-spacing: 0.05em;
+    border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
+  }
+
+  /* ─────────  Section 7: delivery checklist  ───────── */
+  .delivery {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  .delivery-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+  }
+  .delivery-card h3 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 18px; font-weight: 500; margin-bottom: 16px;
+  }
+  .file-list { display: flex; flex-direction: column; gap: 8px; }
+  .file-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 12px;
+  }
+  .file-icon {
+    width: 22px; height: 22px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-3);
+  }
+  .file-name { flex: 1; color: var(--text-1); }
+  .file-size { color: var(--text-3); font-size: 10px; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .code-block {
+    background: #1a1a1a;
+    color: #e8e6e2;
+    padding: 18px 22px;
+    border-radius: 8px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 12px; line-height: 1.65;
+    overflow-x: auto;
+    margin-top: 14px;
+  }
+  .code-block .c { color: #8b8682; }
+  .code-block .s { color: #e8d9c4; }
+  .code-block .k { color: #b8a980; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">final pass · B · Aperture · full delivery</div>
+  <h1>imago · <em>你选定的方向</em></h1>
+  <p class="lede">
+    三重双关——相机<b>光圈</b>、蝴蝶<b>翅膀</b>、睁开的<b>眼瞳</b>——
+    叠在一个杏仁形里。外壳用 <code>#2d2d2d → #1a1a1a</code> 墨渐变，
+    中心的米金光 <code>#f5e6c3</code> 是唯一签名色，呼应 imago 拉丁词根「像」。
+    下面是所有交付物 + 如何落到 Sidebar 里。
+  </p>
+</header>
+
+<!-- ========================================================== -->
+<section>
+  <div class="section-head">
+    <div class="section-num">i</div>
+    <div class="section-title">主 logo</div>
+    <div class="section-sub">176 × 176 · presentation size</div>
+  </div>
+  <div class="hero">
+    <svg class="hero-icon" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <defs>
+        <linearGradient id="h-shell" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2d2d2d"/>
+          <stop offset="1" stop-color="#1a1a1a"/>
+        </linearGradient>
+        <radialGradient id="h-glow" cx="0.5" cy="0.5" r="0.42">
+          <stop offset="0" stop-color="#f5e6c3" stop-opacity="1"/>
+          <stop offset="0.55" stop-color="#d7b27a" stop-opacity="0.5"/>
+          <stop offset="1" stop-color="#a07944" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect x="4" y="4" width="88" height="88" rx="22" fill="url(#h-shell)"/>
+      <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" stroke="#e8e6e2" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z" stroke="#e8e6e2" stroke-width="1" opacity="0.45"/>
+      <circle cx="48" cy="48" r="9" fill="url(#h-glow)"/>
+      <circle cx="48" cy="48" r="2.2" fill="#f5e6c3"/>
+    </svg>
+    <div class="hero-wordmark">imago</div>
+    <div class="hero-tagline">your private archive — a place for images to become</div>
+  </div>
+</section>
+
+<!-- ========================================================== -->
+<section>
+  <div class="section-head">
+    <div class="section-num">ii</div>
+    <div class="section-title">尺寸阶梯</div>
+    <div class="section-sub">每个尺寸独立优化 · not just scaled</div>
+  </div>
+  <div class="ladder">
+
+    <div class="ladder-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="0" y="0" width="16" height="16" rx="3.5" fill="#1f1f1f"/>
+        <path d="M 3 8 Q 8 3.5 13 8 Q 8 12.5 3 8 Z" stroke="#f5e6c3" stroke-width="1.3" stroke-linejoin="round"/>
+        <circle cx="8" cy="8" r="1.5" fill="#f5e6c3"/>
+      </svg>
+      <div class="ladder-label"><b>16</b> · favicon</div>
+    </div>
+
+    <div class="ladder-item">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <defs><linearGradient id="l32-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2d2d"/><stop offset="1" stop-color="#1a1a1a"/></linearGradient></defs>
+        <rect x="0" y="0" width="32" height="32" rx="7" fill="url(#l32-s)"/>
+        <path d="M 6 16 Q 16 6.5 26 16 Q 16 25.5 6 16 Z" stroke="#f5e6c3" stroke-width="1.4" stroke-linejoin="round"/>
+        <circle cx="16" cy="16" r="2.2" fill="#f5e6c3"/>
+      </svg>
+      <div class="ladder-label"><b>32</b> · favicon retina</div>
+    </div>
+
+    <div class="ladder-item">
+      <svg width="48" height="48" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <linearGradient id="l48-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2d2d"/><stop offset="1" stop-color="#1a1a1a"/></linearGradient>
+          <radialGradient id="l48-g" cx="0.5" cy="0.5" r="0.42"><stop offset="0" stop-color="#f5e6c3" stop-opacity="1"/><stop offset="0.55" stop-color="#d7b27a" stop-opacity="0.5"/><stop offset="1" stop-color="#a07944" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect x="4" y="4" width="88" height="88" rx="22" fill="url(#l48-s)"/>
+        <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" stroke="#e8e6e2" stroke-width="2.2" stroke-linejoin="round"/>
+        <circle cx="48" cy="48" r="9" fill="url(#l48-g)"/>
+        <circle cx="48" cy="48" r="2.8" fill="#f5e6c3"/>
+      </svg>
+      <div class="ladder-label"><b>48</b> · app icon</div>
+    </div>
+
+    <div class="ladder-item">
+      <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <linearGradient id="l96-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2d2d"/><stop offset="1" stop-color="#1a1a1a"/></linearGradient>
+          <radialGradient id="l96-g" cx="0.5" cy="0.5" r="0.42"><stop offset="0" stop-color="#f5e6c3" stop-opacity="1"/><stop offset="0.55" stop-color="#d7b27a" stop-opacity="0.5"/><stop offset="1" stop-color="#a07944" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect x="4" y="4" width="88" height="88" rx="22" fill="url(#l96-s)"/>
+        <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" stroke="#e8e6e2" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z" stroke="#e8e6e2" stroke-width="1" opacity="0.45"/>
+        <circle cx="48" cy="48" r="9" fill="url(#l96-g)"/>
+        <circle cx="48" cy="48" r="2.2" fill="#f5e6c3"/>
+      </svg>
+      <div class="ladder-label"><b>96</b> · standard</div>
+    </div>
+
+    <div class="ladder-item">
+      <svg width="144" height="144" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <linearGradient id="l144-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2d2d"/><stop offset="1" stop-color="#1a1a1a"/></linearGradient>
+          <radialGradient id="l144-g" cx="0.5" cy="0.5" r="0.42"><stop offset="0" stop-color="#f5e6c3" stop-opacity="1"/><stop offset="0.55" stop-color="#d7b27a" stop-opacity="0.5"/><stop offset="1" stop-color="#a07944" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect x="4" y="4" width="88" height="88" rx="22" fill="url(#l144-s)"/>
+        <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" stroke="#e8e6e2" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z" stroke="#e8e6e2" stroke-width="1" opacity="0.45"/>
+        <circle cx="48" cy="48" r="9" fill="url(#l144-g)"/>
+        <circle cx="48" cy="48" r="2.2" fill="#f5e6c3"/>
+      </svg>
+      <div class="ladder-label"><b>144</b> · social hover</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== -->
+<section>
+  <div class="section-head">
+    <div class="section-num">iii</div>
+    <div class="section-title">色彩变体</div>
+    <div class="section-sub">color · mono-dark · mono-light</div>
+  </div>
+  <div class="grid-3">
+
+    <div class="var-card">
+      <div class="var-stage paper">
+        <svg viewBox="0 0 96 96" fill="none">
+          <defs>
+            <linearGradient id="v1-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2d2d"/><stop offset="1" stop-color="#1a1a1a"/></linearGradient>
+            <radialGradient id="v1-g" cx="0.5" cy="0.5" r="0.42"><stop offset="0" stop-color="#f5e6c3" stop-opacity="1"/><stop offset="0.55" stop-color="#d7b27a" stop-opacity="0.5"/><stop offset="1" stop-color="#a07944" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="url(#v1-s)"/>
+          <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" stroke="#e8e6e2" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z" stroke="#e8e6e2" stroke-width="1" opacity="0.45"/>
+          <circle cx="48" cy="48" r="9" fill="url(#v1-g)"/>
+          <circle cx="48" cy="48" r="2.2" fill="#f5e6c3"/>
+        </svg>
+      </div>
+      <div class="var-caption">
+        <span>彩色主版 · 带渐变</span>
+        <code>logo.svg</code>
+      </div>
+    </div>
+
+    <div class="var-card">
+      <div class="var-stage dark">
+        <svg viewBox="0 0 96 96" fill="none">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#1a1a1a"/>
+          <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z" stroke="#ffffff" stroke-width="1" opacity="0.45"/>
+          <circle cx="48" cy="48" r="2.6" fill="#ffffff"/>
+        </svg>
+      </div>
+      <div class="var-caption">
+        <span>单色反白 · 给深底</span>
+        <code>logo-mono-dark.svg</code>
+      </div>
+    </div>
+
+    <div class="var-card">
+      <div class="var-stage white">
+        <svg viewBox="0 0 96 96" fill="none">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#ffffff" stroke="#37352f" stroke-width="1.2"/>
+          <path d="M 22 48 Q 48 22 74 48 Q 48 74 22 48 Z" stroke="#37352f" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M 30 48 Q 48 32 66 48 Q 48 64 30 48 Z" stroke="#37352f" stroke-width="1" opacity="0.45"/>
+          <circle cx="48" cy="48" r="2.6" fill="#37352f"/>
+        </svg>
+      </div>
+      <div class="var-caption">
+        <span>单色黑线 · 给打印/单色</span>
+        <code>logo-mono-light.svg</code>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========================================================== -->
+<section>
+  <div class="section-head">
+    <div class="section-num">iv</div>
+    <div class="section-title">落到 Sidebar 的真实样子</div>
+    <div class="section-sub">imago.lglgl.me · sidebar 248px · icon 30×30</div>
+  </div>
+  <div class="sidebar-mock">
+    <div class="sb-side">
+      <div class="sb-brand">
+        <svg class="sb-brand-icon" viewBox="0 0 30 30" fill="none">
+          <defs><linearGradient id="sb-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2d2d"/><stop offset="1" stop-color="#1a1a1a"/></linearGradient></defs>
+          <rect x="0" y="0" width="30" height="30" rx="7" fill="url(#sb-s)"/>
+          <path d="M 6 15 Q 15 6 24 15 Q 15 24 6 15 Z" stroke="#f5e6c3" stroke-width="1.3" stroke-linejoin="round"/>
+          <circle cx="15" cy="15" r="2" fill="#f5e6c3"/>
+        </svg>
+        <div class="sb-brand-name">imago</div>
+      </div>
+      <div class="sb-items">
+        <div class="sb-item active">
+          <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+          All<span class="sb-item-count">1,284</span>
+        </div>
+        <div class="sb-item">
+          <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9"/></svg>
+          Starred<span class="sb-item-count">42</span>
+        </div>
+        <div class="sb-item">
+          <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2 6h6l-5 4 2 7-5-4-5 4 2-7-5-4h6z"/></svg>
+          Recent<span class="sb-item-count">28</span>
+        </div>
+        <div class="sb-item">
+          <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          Trash<span class="sb-item-count">3</span>
+        </div>
+      </div>
+      <div class="sb-section-head">Albums</div>
+      <div class="sb-items">
+        <div class="sb-item">
+          <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l4-4h10l4 4v13a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"/></svg>
+          Kyoto '24<span class="sb-item-count">86</span>
+        </div>
+        <div class="sb-item">
+          <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l4-4h10l4 4v13a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"/></svg>
+          Studio film<span class="sb-item-count">212</span>
+        </div>
+        <div class="sb-item">
+          <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l4-4h10l4 4v13a1 1 0 01-1 1H4a1 1 0 01-1-1V7z"/></svg>
+          Old library<span class="sb-item-count">447</span>
+        </div>
+      </div>
+    </div>
+    <div class="sb-main">
+      <div class="sb-topbar">
+        <span class="sb-topbar-title">All</span>
+        <span class="sb-topbar-count">1,284 photos</span>
+        <span class="sb-topbar-spacer"></span>
+        <span class="sb-upload">Upload</span>
+      </div>
+      <div class="gallery-row">
+        <div class="gallery-cell"></div><div class="gallery-cell"></div>
+        <div class="gallery-cell"></div><div class="gallery-cell"></div>
+      </div>
+      <div class="gallery-row">
+        <div class="gallery-cell"></div><div class="gallery-cell"></div>
+        <div class="gallery-cell"></div><div class="gallery-cell"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== -->
+<section>
+  <div class="section-head">
+    <div class="section-num">v</div>
+    <div class="section-title">浏览器 tab 的 favicon</div>
+    <div class="section-sub">16×16 在小尺寸下依然可读</div>
+  </div>
+  <div class="browser-chrome">
+    <div class="bc-tabs">
+      <div class="bc-tab active">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <rect x="0" y="0" width="16" height="16" rx="3.5" fill="#1f1f1f"/>
+          <path d="M 3 8 Q 8 3.5 13 8 Q 8 12.5 3 8 Z" stroke="#f5e6c3" stroke-width="1.3" stroke-linejoin="round"/>
+          <circle cx="8" cy="8" r="1.5" fill="#f5e6c3"/>
+        </svg>
+        <span>imago · your private archive</span>
+        <span class="bc-tab-close">×</span>
+      </div>
+      <div class="bc-tab">
+        <svg width="14" height="14" viewBox="0 0 16 16"><rect width="16" height="16" rx="3" fill="#aaa"/></svg>
+        <span>Notion</span>
+      </div>
+      <div class="bc-tab">
+        <svg width="14" height="14" viewBox="0 0 16 16"><rect width="16" height="16" rx="3" fill="#888"/></svg>
+        <span>Figma</span>
+      </div>
+    </div>
+    <div class="bc-url">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#787774" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      imago.lglgl.me
+    </div>
+    <div class="bc-content">/* 这就是 favicon 在 tab 里的实际大小 → 14-16px */</div>
+  </div>
+</section>
+
+<!-- ========================================================== -->
+<section>
+  <div class="section-head">
+    <div class="section-num">vi</div>
+    <div class="section-title">社交分享 OG 图</div>
+    <div class="section-sub">1200 × 630 · for Twitter / slack / iMessage</div>
+  </div>
+  <div class="og-card">
+    <img src="og-image.png" class="og-image" alt="imago og image"/>
+    <div class="og-meta">
+      <span class="og-host">imago.lglgl.me · shared on Twitter / Slack / iMessage</span>
+      <span class="og-spec">1200 × 630 · og-image.png</span>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== -->
+<section>
+  <div class="section-head">
+    <div class="section-num">vii</div>
+    <div class="section-title">交付物 + 如何集成</div>
+    <div class="section-sub">all files in assets/design/logo/final/</div>
+  </div>
+  <div class="delivery">
+
+    <div class="delivery-card">
+      <h3>文件清单</h3>
+      <div class="file-list">
+        <div class="file-row">
+          <div class="file-icon">◇</div>
+          <span class="file-name">logo.svg</span>
+          <span class="file-size">彩色主版</span>
+        </div>
+        <div class="file-row">
+          <div class="file-icon">◇</div>
+          <span class="file-name">logo-mono-dark.svg</span>
+          <span class="file-size">反白·深底用</span>
+        </div>
+        <div class="file-row">
+          <div class="file-icon">◇</div>
+          <span class="file-name">logo-mono-light.svg</span>
+          <span class="file-size">线稿·浅底用</span>
+        </div>
+        <div class="file-row">
+          <div class="file-icon">◇</div>
+          <span class="file-name">favicon-16.svg</span>
+          <span class="file-size">tab / bookmark</span>
+        </div>
+        <div class="file-row">
+          <div class="file-icon">◇</div>
+          <span class="file-name">favicon-32.svg</span>
+          <span class="file-size">retina · hidpi</span>
+        </div>
+        <div class="file-row">
+          <div class="file-icon">□</div>
+          <span class="file-name">og-image.png</span>
+          <span class="file-size">1200×630</span>
+        </div>
+        <div class="file-row">
+          <div class="file-icon">□</div>
+          <span class="file-name">social-avatar-1024.png</span>
+          <span class="file-size">1024×1024</span>
+        </div>
+      </div>
+      <div class="tag-row">
+        <span class="tag">all lossless</span>
+        <span class="tag">可缩放</span>
+        <span class="tag">可改色</span>
+      </div>
+    </div>
+
+    <div class="delivery-card">
+      <h3>Sidebar.tsx 集成</h3>
+      <div style="font-size: 13px; color: var(--text-2); line-height: 1.65;">
+        打开 <code style="font-family: ui-monospace; background: var(--paper); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border); font-size: 12px; color: var(--text-1);">src/client/components/Sidebar.tsx</code>，
+        把第 <b style="color: var(--text-1);">64-80 行</b> 的 brand block 替换为下方代码。同时 <code style="font-family: ui-monospace; background: var(--paper); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border); font-size: 12px; color: var(--text-1);">src/client/index.html</code> 里的 Google Fonts link 要加上 <code style="font-family: ui-monospace; background: var(--paper); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border); font-size: 12px; color: var(--text-1);">Newsreader:ital,wght@1,500</code>（给 brand name 斜体）。
+      </div>
+      <div class="code-block">
+<span class="c">{/* Brand */}</span>
+&lt;<span class="k">div</span> style={{ padding: <span class="s">'14px 16px 10px'</span>, display: <span class="s">'flex'</span>, alignItems: <span class="s">'center'</span>, gap: <span class="s">10</span> }}&gt;
+  &lt;<span class="k">svg</span>
+    width=<span class="s">"30"</span> height=<span class="s">"30"</span> viewBox=<span class="s">"0 0 30 30"</span> fill=<span class="s">"none"</span>
+    style={{ flexShrink: 0, display: <span class="s">'block'</span>,
+      filter: <span class="s">'drop-shadow(0 2px 4px rgba(0,0,0,.22))'</span> }}
+    aria-label=<span class="s">"imago"</span>
+  &gt;
+    &lt;<span class="k">defs</span>&gt;
+      &lt;<span class="k">linearGradient</span> id=<span class="s">"sb-shell"</span> x1=<span class="s">"0"</span> y1=<span class="s">"0"</span> x2=<span class="s">"0"</span> y2=<span class="s">"1"</span>&gt;
+        &lt;<span class="k">stop</span> offset=<span class="s">"0"</span> stopColor=<span class="s">"#2d2d2d"</span>/&gt;
+        &lt;<span class="k">stop</span> offset=<span class="s">"1"</span> stopColor=<span class="s">"#1a1a1a"</span>/&gt;
+      &lt;/<span class="k">linearGradient</span>&gt;
+    &lt;/<span class="k">defs</span>&gt;
+    &lt;<span class="k">rect</span> width=<span class="s">"30"</span> height=<span class="s">"30"</span> rx=<span class="s">"7"</span> fill=<span class="s">"url(#sb-shell)"</span>/&gt;
+    &lt;<span class="k">path</span> d=<span class="s">"M 6 15 Q 15 6 24 15 Q 15 24 6 15 Z"</span>
+          stroke=<span class="s">"#f5e6c3"</span> strokeWidth=<span class="s">"1.3"</span>
+          strokeLinejoin=<span class="s">"round"</span> fill=<span class="s">"none"</span>/&gt;
+    &lt;<span class="k">circle</span> cx=<span class="s">"15"</span> cy=<span class="s">"15"</span> r=<span class="s">"2"</span> fill=<span class="s">"#f5e6c3"</span>/&gt;
+  &lt;/<span class="k">svg</span>&gt;
+  &lt;<span class="k">div</span> style={{
+    fontFamily: <span class="s">"'Newsreader', Georgia, serif"</span>,
+    fontStyle: <span class="s">'italic'</span>, fontSize: <span class="s">18</span>, fontWeight: <span class="s">500</span>,
+    letterSpacing: <span class="s">'-.015em'</span>
+  }}&gt;imago&lt;/<span class="k">div</span>&gt;
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</body>
+</html>
