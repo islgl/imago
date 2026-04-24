@@ -3,6 +3,7 @@ import type { Env, ImageRow } from '../types';
 import { toImageDTO } from '../types';
 import { imageId } from '../lib/ids';
 import { extractDimensions, extensionFromMime } from '../lib/image-meta';
+import { signUrl } from '../lib/sign';
 
 const MAX_SIZE = 20 * 1024 * 1024;
 const ALLOWED_MIME = /^image\/(png|jpeg|webp|gif|svg\+xml|avif)$/;
@@ -123,6 +124,20 @@ app.patch('/:id', async (c) => {
   if (!row) return c.json({ error: 'not found' }, 404);
   const origin = new URL(c.req.url).origin;
   return c.json(toImageDTO(row, origin));
+});
+
+app.get('/:id/sign', async (c) => {
+  const row = await c.env.DB.prepare('SELECT key, is_public FROM images WHERE id = ? AND deleted_at IS NULL')
+    .bind(c.req.param('id'))
+    .first<{ key: string; is_public: number }>();
+  if (!row) return c.json({ error: 'not found' }, 404);
+  if (row.is_public === 1) return c.json({ error: 'image is already public' }, 400);
+
+  const ttl = Math.min(Math.max(Number(c.req.query('ttl') ?? 3600), 60), 7 * 24 * 3600);
+  const { expires, sig } = await signUrl(row.key, ttl, c.env.IMAGO_PASSWORD ?? '');
+  const origin = new URL(c.req.url).origin;
+  const signedUrl = `${origin}/p/${row.key}?expires=${expires}&sig=${sig}`;
+  return c.json({ signedUrl, expiresAt: expires });
 });
 
 app.delete('/:id', async (c) => {

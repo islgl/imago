@@ -3,6 +3,7 @@ import { Icon } from './Icon';
 import { Btn } from './Btn';
 import type { Album, Image } from '../types';
 import { formatBytes, formatDate, makeEmbeds, extFromFilename } from '../lib/utils';
+import { signImage } from '../lib/api';
 
 export function DetailPanel({
   img,
@@ -21,12 +22,35 @@ export function DetailPanel({
 }) {
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<'info' | 'link'>('info');
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [signedExpiry, setSignedExpiry] = useState<number | null>(null);
+  const [signing, setSigning] = useState(false);
+  const [signTtl, setSignTtl] = useState(3600);
+  const [copiedSigned, setCopiedSigned] = useState(false);
   const linkUrl = img.publicUrl ?? img.url;
 
   const copyLink = async () => {
     await navigator.clipboard.writeText(linkUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const generateSignedUrl = async () => {
+    setSigning(true);
+    try {
+      const result = await signImage(img.id, signTtl);
+      setSignedUrl(result.signedUrl);
+      setSignedExpiry(result.expiresAt);
+    } finally {
+      setSigning(false);
+    }
+  };
+
+  const copySignedUrl = async () => {
+    if (!signedUrl) return;
+    await navigator.clipboard.writeText(signedUrl);
+    setCopiedSigned(true);
+    setTimeout(() => setCopiedSigned(false), 2000);
   };
 
   const albumName = albums.find((a) => a.id === img.albumId)?.name ?? '—';
@@ -236,6 +260,77 @@ export function DetailPanel({
             >
               {copied ? 'Copied to clipboard' : 'Copy URL'}
             </Btn>
+
+            {!img.isPublic && (
+              <div style={{ marginTop: 20 }}>
+                <SectionLabel>Signed URL (temporary access)</SectionLabel>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                  {([
+                    { label: '1 hour', value: 3600 },
+                    { label: '24 hours', value: 86400 },
+                    { label: '7 days', value: 604800 },
+                  ] as const).map(({ label, value }) => (
+                    <button
+                      key={value}
+                      onClick={() => { setSignTtl(value); setSignedUrl(null); setSignedExpiry(null); }}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: 11.5,
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--r-sm)',
+                        cursor: 'pointer',
+                        background: signTtl === value ? 'var(--active-bg)' : 'transparent',
+                        color: signTtl === value ? 'var(--text-1)' : 'var(--text-2)',
+                        fontWeight: signTtl === value ? 500 : 400,
+                        transition: 'all 0.1s',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {signedUrl ? (
+                  <>
+                    <div
+                      style={{
+                        background: 'var(--sidebar-bg)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--r)',
+                        padding: '10px 12px',
+                        marginBottom: 6,
+                        fontFamily: 'ui-monospace, "SF Mono", monospace',
+                        fontSize: 11,
+                        color: 'var(--text-2)',
+                        wordBreak: 'break-all',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {signedUrl}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 8 }}>
+                      Expires {signedExpiry ? new Date(signedExpiry).toLocaleString() : ''}
+                    </div>
+                    <Btn
+                      variant={copiedSigned ? 'outline' : 'accent'}
+                      icon={copiedSigned ? 'check' : 'copy'}
+                      onClick={copySignedUrl}
+                      style={{ width: '100%', justifyContent: 'center' }}
+                    >
+                      {copiedSigned ? 'Copied' : 'Copy signed URL'}
+                    </Btn>
+                  </>
+                ) : (
+                  <Btn
+                    variant="outline"
+                    icon="link2"
+                    onClick={generateSignedUrl}
+                    style={{ width: '100%', justifyContent: 'center' }}
+                  >
+                    {signing ? 'Generating…' : 'Generate signed URL'}
+                  </Btn>
+                )}
+              </div>
+            )}
 
             <div style={{ marginTop: 20 }}>
               <SectionLabel>Embed</SectionLabel>
