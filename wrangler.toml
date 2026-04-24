@@ -26,7 +26,7 @@ migrations_dir = "migrations"
 
 [[kv_namespaces]]
 binding = "RL_KV"
-id = "imago-ratelimit"
+id = "7ce0fa61daa84a17b78bcf097c03f4db"
 
 [vars]
 ENVIRONMENT = "production"
