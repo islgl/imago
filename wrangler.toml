@@ -24,5 +24,14 @@ database_name = "imago"
 database_id = "369212c3-0eec-4cf5-93e2-b3db9666756d"
 migrations_dir = "migrations"
 
+[[kv_namespaces]]
+binding = "RL_KV"
+id = "imago-ratelimit"
+
 [vars]
 ENVIRONMENT = "production"
+# Comma-separated allowed referer domains, e.g. "myblog.com,www.myblog.com"
+# Leave empty to allow all referers
+ALLOWED_REFERERS = ""
+# Max requests per IP per minute for public images (0 = unlimited)
+RATE_LIMIT_RPM = "120"
