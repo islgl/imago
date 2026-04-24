@@ -2,8 +2,11 @@ export interface Env {
   R2: R2Bucket;
   DB: D1Database;
   ASSETS: Fetcher;
+  RL_KV: KVNamespace;
   ENVIRONMENT: string;
   IMAGO_PASSWORD: string;
+  ALLOWED_REFERERS: string;
+  RATE_LIMIT_RPM: string;
 }
 
 export interface ImageRow {
