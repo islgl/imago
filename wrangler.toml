@@ -32,6 +32,6 @@ id = "7ce0fa61daa84a17b78bcf097c03f4db"
 ENVIRONMENT = "production"
 # Comma-separated allowed referer domains, e.g. "myblog.com,www.myblog.com"
 # Leave empty to allow all referers
-ALLOWED_REFERERS = "nous.lglgl.me"
+ALLOWED_REFERERS = "blog.lglgl.me"
 # Max requests per IP per minute for public images (0 = unlimited)
 RATE_LIMIT_RPM = "120"
