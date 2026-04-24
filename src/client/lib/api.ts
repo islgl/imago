@@ -101,3 +101,7 @@ export async function deleteAlbum(id: string): Promise<void> {
 export async function getStorage(): Promise<Storage> {
   return request<Storage>('/api/me/storage');
 }
+
+export async function signImage(id: string, ttl: number): Promise<{ signedUrl: string; expiresAt: number }> {
+  return request<{ signedUrl: string; expiresAt: number }>(`/api/images/${id}/sign?ttl=${ttl}`);
+}
