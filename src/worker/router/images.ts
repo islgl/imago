@@ -7,8 +7,17 @@ import { signUrl } from '../lib/sign';
 
 const MAX_SIZE = 20 * 1024 * 1024;
 const ALLOWED_MIME = /^image\/(png|jpeg|webp|gif|svg\+xml|avif)$/;
+const MAX_FILENAME_LENGTH = 255;
 
 const app = new Hono<{ Bindings: Env }>();
+
+function normalizeFilename(value: string): string | null {
+  const filename = value.trim();
+  if (!filename || filename.length > MAX_FILENAME_LENGTH) return null;
+  if (filename === '.' || filename === '..') return null;
+  if (/[\\/\u0000-\u001f\u007f]/.test(filename)) return null;
+  return filename;
+}
 
 app.get('/', async (c) => {
   const view = c.req.query('view') ?? 'all';
@@ -112,7 +121,12 @@ app.patch('/:id', async (c) => {
   if (body.is_starred !== undefined) fields.push('is_starred = ?'), params.push(body.is_starred ? 1 : 0);
   if (body.is_public !== undefined) fields.push('is_public = ?'), params.push(body.is_public ? 1 : 0);
   if (body.album_id !== undefined) fields.push('album_id = ?'), params.push(body.album_id);
-  if (body.filename !== undefined) fields.push('filename = ?'), params.push(body.filename);
+  if (body.filename !== undefined) {
+    if (typeof body.filename !== 'string') return c.json({ error: 'invalid filename' }, 400);
+    const filename = normalizeFilename(body.filename);
+    if (!filename) return c.json({ error: 'invalid filename' }, 400);
+    fields.push('filename = ?'), params.push(filename);
+  }
   if (fields.length === 0) return c.json({ error: 'no fields to update' }, 400);
   params.push(c.req.param('id'));
 

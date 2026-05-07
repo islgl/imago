@@ -25,3 +25,13 @@ export function extFromFilename(name: string): string {
   const i = name.lastIndexOf('.');
   return i >= 0 ? name.slice(i + 1).toUpperCase() : '';
 }
+
+export function imageFilenameError(name: string): string | null {
+  const filename = name.trim();
+  if (!filename) return 'Filename is required';
+  if (filename.length > 255) return 'Filename must be 255 characters or fewer';
+  if (/[\\/\u0000-\u001f\u007f]/.test(filename) || filename === '.' || filename === '..') {
+    return 'Filename cannot contain path separators or control characters';
+  }
+  return null;
+}

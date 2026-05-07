@@ -10,6 +10,7 @@ export function ContextMenu({
   onOpen,
   onCopy,
   onDownload,
+  onRename,
   onToggleStar,
   onTogglePublic,
   onDelete,
@@ -21,6 +22,7 @@ export function ContextMenu({
   onOpen: (img: Image) => void;
   onCopy: (img: Image) => Promise<void>;
   onDownload: (img: Image) => void;
+  onRename: (img: Image) => Promise<void>;
   onToggleStar: (img: Image) => void;
   onTogglePublic: (img: Image) => void;
   onDelete: (img: Image) => void;
@@ -56,6 +58,7 @@ export function ContextMenu({
     { kind: 'divider' },
     { kind: 'item', label: 'Copy link',                                         icon: 'link2',    onClick: async () => { await onCopy(img); onClose(); } },
     { kind: 'item', label: 'Download',                                          icon: 'download', onClick: () => { onDownload(img); onClose(); } },
+    { kind: 'item', label: 'Rename',                                            icon: 'edit',     onClick: async () => { await onRename(img); onClose(); } },
     { kind: 'divider' },
     { kind: 'item', label: img.isStarred ? 'Unstar' : 'Star',                  icon: 'star',     onClick: () => { onToggleStar(img); onClose(); } },
     { kind: 'item', label: img.isPublic  ? 'Make private' : 'Make public',     icon: img.isPublic ? 'lock' : 'globe', onClick: () => { onTogglePublic(img); onClose(); } },

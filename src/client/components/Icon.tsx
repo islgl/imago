@@ -15,6 +15,7 @@ import {
   List,
   Lock,
   MoreHorizontal,
+  Pencil,
   Plus,
   Search,
   Settings,
@@ -48,6 +49,7 @@ const ICONS: Record<string, LucideIcon> = {
   chevronR:  ChevronRight,
   chevronD:  ChevronDown,
   ellipsis:  MoreHorizontal,
+  edit:      Pencil,
   warning:   AlertTriangle,
   sparkle:   Sparkles,
 };

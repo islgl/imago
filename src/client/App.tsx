@@ -16,6 +16,7 @@ import {
   patchImage,
   createAlbum,
 } from './lib/api';
+import { imageFilenameError } from './lib/utils';
 import type { Album, Image, NavView, SortBy, ViewMode } from './types';
 
 export function App() {
@@ -158,6 +159,31 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
     refreshAll();
   };
 
+  const handleRename = async (img: Image, filename: string) => {
+    const updated = await patchImage(img.id, { filename });
+    setDetail((d) => (d && d.id === img.id ? updated : d));
+    setCtxMenu((menu) => (menu && menu.img.id === img.id ? { ...menu, img: updated } : menu));
+    refreshAll();
+    return updated;
+  };
+
+  const handlePromptRename = async (img: Image) => {
+    const next = window.prompt('Rename image', img.filename);
+    if (next === null) return;
+    const filename = next.trim();
+    const error = imageFilenameError(filename);
+    if (error) {
+      window.alert(error);
+      return;
+    }
+    if (filename === img.filename) return;
+    try {
+      await handleRename(img, filename);
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Failed to rename image');
+    }
+  };
+
   const handleCreateAlbum = async () => {
     const name = window.prompt('Album name');
     if (!name || !name.trim()) return;
@@ -244,6 +270,7 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
           albums={albums}
           onClose={() => setDetail(null)}
           onDelete={handleDelete}
+          onRename={handleRename}
           onToggleStar={handleToggleStar}
           onTogglePublic={handleTogglePublic}
         />
@@ -263,6 +290,7 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
           onOpen={(img) => setDetail(img)}
           onCopy={handleCopy}
           onDownload={handleDownload}
+          onRename={handlePromptRename}
           onToggleStar={handleToggleStar}
           onTogglePublic={handleTogglePublic}
           onDelete={handleDelete}
