@@ -17,6 +17,7 @@ import {
   patchImage,
   createAlbum,
 } from './lib/api';
+import { downloadCompressedImage, type DownloadResult } from './lib/download';
 import type { Album, Image, NavView, SortBy, ViewMode } from './types';
 
 export function App() {
@@ -175,11 +176,8 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
     albumsSWR.mutate();
   };
 
-  const handleDownload = (img: Image) => {
-    const a = document.createElement('a');
-    a.href = img.url;
-    a.download = img.filename;
-    a.click();
+  const handleDownload = async (img: Image): Promise<DownloadResult> => {
+    return downloadCompressedImage(img);
   };
 
   const handleLogout = async () => {
@@ -255,6 +253,7 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
           onClose={() => setDetail(null)}
           onDelete={handleDelete}
           onRename={setRenameTarget}
+          onDownload={handleDownload}
           onToggleStar={handleToggleStar}
           onTogglePublic={handleTogglePublic}
         />

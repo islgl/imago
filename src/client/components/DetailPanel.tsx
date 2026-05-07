@@ -4,6 +4,7 @@ import { Btn } from './Btn';
 import type { Album, Image } from '../types';
 import { formatBytes, formatDate, makeEmbeds, extFromFilename } from '../lib/utils';
 import { signImage } from '../lib/api';
+import type { DownloadResult } from '../lib/download';
 
 export function DetailPanel({
   img,
@@ -11,6 +12,7 @@ export function DetailPanel({
   onClose,
   onDelete,
   onRename,
+  onDownload,
   onToggleStar,
   onTogglePublic,
 }: {
@@ -19,6 +21,7 @@ export function DetailPanel({
   onClose: () => void;
   onDelete: (img: Image) => void;
   onRename: (img: Image) => void;
+  onDownload: (img: Image) => Promise<DownloadResult>;
   onToggleStar: (img: Image) => void;
   onTogglePublic: (img: Image) => void;
 }) {
@@ -29,6 +32,9 @@ export function DetailPanel({
   const [signing, setSigning] = useState(false);
   const [signTtl, setSignTtl] = useState(3600);
   const [copiedSigned, setCopiedSigned] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadNote, setDownloadNote] = useState<string>('');
+  const [downloadError, setDownloadError] = useState<string>('');
   const linkUrl = img.publicUrl ?? img.url;
 
   const copyLink = async () => {
@@ -53,6 +59,24 @@ export function DetailPanel({
     await navigator.clipboard.writeText(signedUrl);
     setCopiedSigned(true);
     setTimeout(() => setCopiedSigned(false), 2000);
+  };
+
+  const downloadImage = async () => {
+    setDownloading(true);
+    setDownloadNote('');
+    setDownloadError('');
+    try {
+      const result = await onDownload(img);
+      setDownloadNote(
+        result.compressed
+          ? `${formatBytes(result.originalSize)} -> ${formatBytes(result.finalSize)}`
+          : 'Downloaded original',
+      );
+    } catch (e) {
+      setDownloadError(e instanceof Error ? e.message : 'Download failed');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const albumName = albums.find((a) => a.id === img.albumId)?.name ?? '—';
@@ -379,23 +403,37 @@ export function DetailPanel({
         style={{
           padding: '10px 12px 14px',
           borderTop: '1px solid var(--border)',
+          position: 'relative',
           display: 'flex',
           gap: 7,
           flexShrink: 0,
         }}
       >
+        {(downloadNote || downloadError) && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 12,
+              right: 12,
+              bottom: 54,
+              fontSize: 11.5,
+              color: downloadError ? 'var(--danger)' : 'var(--success)',
+              textAlign: 'center',
+              pointerEvents: 'none',
+            }}
+          >
+            {downloadError || downloadNote}
+          </div>
+        )}
         <Btn
           variant="outline"
           icon="download"
-          onClick={() => {
-            const a = document.createElement('a');
-            a.href = img.url;
-            a.download = img.filename;
-            a.click();
-          }}
+          onClick={() => { void downloadImage(); }}
+          disabled={downloading}
+          title="Download compressed"
           style={{ flex: 1, justifyContent: 'center' }}
         >
-          Download
+          {downloading ? 'Compressing' : 'Download'}
         </Btn>
         <Btn
           variant="outline"

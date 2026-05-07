@@ -1,10 +1,8 @@
-import { useRef, useState, type Dispatch, type SetStateAction } from 'react';
+import { useRef, useState } from 'react';
 import { Icon } from './Icon';
 import { Btn } from './Btn';
 import type { Image } from '../types';
 import { uploadImage } from '../lib/api';
-import { compressImageFile, type CompressionOptions } from '../lib/compress';
-import { formatBytes } from '../lib/utils';
 
 type Phase = 'idle' | 'uploading' | 'done' | 'error';
 
@@ -18,42 +16,24 @@ export function UploadModal({
   const [drag, setDrag] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
   const [progress, setProgress] = useState(0);
-  const [preparing, setPreparing] = useState(false);
   const [current, setCurrent] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [compression, setCompression] = useState<CompressionOptions>({
-    enabled: true,
-    quality: 0.82,
-    maxDimension: 2560,
-  });
-  const [compressionNote, setCompressionNote] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = async (files: FileList | File[]) => {
     const list = Array.from(files);
     if (list.length === 0) return;
     setPhase('uploading');
-    setCompressionNote('');
     try {
       for (const file of list) {
         setCurrent(file.name);
         setProgress(0);
-        setPreparing(true);
-        const result = await compressImageFile(file, compression);
-        setCompressionNote(
-          result.compressed
-            ? `${formatBytes(result.originalSize)} → ${formatBytes(result.finalSize)}`
-            : '',
-        );
-        if (result.file.name !== file.name) setCurrent(result.file.name);
-        setPreparing(false);
-        const img = await uploadImage(result.file, {}, (pct) => setProgress(pct));
+        const img = await uploadImage(file, {}, (pct) => setProgress(pct));
         onUploaded(img);
       }
       setPhase('done');
       setTimeout(onClose, 700);
     } catch (e) {
-      setPreparing(false);
       setError(e instanceof Error ? e.message : 'Upload failed');
       setPhase('error');
     }
@@ -177,8 +157,6 @@ export function UploadModal({
                 </div>
               </div>
 
-              <CompressionControls compression={compression} setCompression={setCompression} />
-
               <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                 <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
                 <Btn variant="solid" icon="upload" onClick={() => fileInputRef.current?.click()}>Select files</Btn>
@@ -189,7 +167,7 @@ export function UploadModal({
           {phase === 'uploading' && (
             <div style={{ padding: '10px 0 6px', textAlign: 'center' }}>
               <div style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 18 }}>
-                {preparing ? 'Preparing' : 'Uploading'} <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>{current}</span>…
+                Uploading <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>{current}</span>…
               </div>
               <div
                 style={{
@@ -211,9 +189,6 @@ export function UploadModal({
                 />
               </div>
               <div style={{ fontSize: 11.5, color: 'var(--text-3)' }}>{Math.floor(progress)}%</div>
-              {compressionNote && (
-                <div style={{ fontSize: 11.5, color: 'var(--success)', marginTop: 8 }}>{compressionNote}</div>
-              )}
             </div>
           )}
 
@@ -260,114 +235,6 @@ export function UploadModal({
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function CompressionControls({
-  compression,
-  setCompression,
-}: {
-  compression: CompressionOptions;
-  setCompression: Dispatch<SetStateAction<CompressionOptions>>;
-}) {
-  return (
-    <div
-      style={{
-        marginTop: 16,
-        padding: 12,
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--r-md)',
-        background: 'var(--sidebar-bg)',
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => setCompression((prev) => ({ ...prev, enabled: !prev.enabled }))}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          border: 'none',
-          background: 'transparent',
-          color: 'var(--text-1)',
-          cursor: 'pointer',
-          textAlign: 'left',
-        }}
-      >
-        <span
-          style={{
-            width: 18,
-            height: 18,
-            borderRadius: 5,
-            background: compression.enabled ? 'var(--accent)' : 'var(--bg)',
-            border: compression.enabled ? 'none' : '1px solid var(--border-mid)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          {compression.enabled && <Icon name="check" size={10} color="#fff" />}
-        </span>
-        <Icon name="sliders" size={14} color={compression.enabled ? 'var(--accent)' : 'var(--text-3)'} />
-        <span style={{ flex: 1, fontSize: 13, fontWeight: 500, letterSpacing: '-0.01em' }}>Compress images</span>
-        <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>
-          {compression.enabled ? `${Math.round(compression.quality * 100)}%` : 'Off'}
-        </span>
-      </button>
-
-      {compression.enabled && (
-        <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
-              <span style={{ fontSize: 11.5, color: 'var(--text-3)' }}>Quality</span>
-              <span style={{ fontSize: 11.5, color: 'var(--text-2)', fontWeight: 500 }}>
-                {Math.round(compression.quality * 100)}%
-              </span>
-            </div>
-            <input
-              type="range"
-              min="0.55"
-              max="0.92"
-              step="0.01"
-              value={compression.quality}
-              onChange={(e) => setCompression((prev) => ({ ...prev, quality: Number(e.target.value) }))}
-              style={{ width: '100%', accentColor: 'var(--accent)' }}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {([
-              { label: 'Small', quality: 0.72, maxDimension: 1920 },
-              { label: 'Balanced', quality: 0.82, maxDimension: 2560 },
-              { label: 'Large', quality: 0.88, maxDimension: 4096 },
-            ] as const).map(({ label, quality, maxDimension }) => {
-              const active = compression.quality === quality && compression.maxDimension === maxDimension;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => setCompression((prev) => ({ ...prev, quality, maxDimension }))}
-                  style={{
-                    flex: 1,
-                    padding: '6px 8px',
-                    border: '1px solid var(--border)',
-                    borderRadius: 'var(--r-sm)',
-                    background: active ? 'var(--active-bg)' : 'var(--bg)',
-                    color: active ? 'var(--text-1)' : 'var(--text-2)',
-                    cursor: 'pointer',
-                    fontSize: 11.5,
-                    fontWeight: active ? 500 : 400,
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
