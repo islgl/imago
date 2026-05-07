@@ -17,6 +17,7 @@ import {
   MoreHorizontal,
   Pencil,
   Plus,
+  SlidersHorizontal,
   Search,
   Settings,
   Sparkles,
@@ -50,6 +51,7 @@ const ICONS: Record<string, LucideIcon> = {
   chevronD:  ChevronDown,
   ellipsis:  MoreHorizontal,
   edit:      Pencil,
+  sliders:   SlidersHorizontal,
   warning:   AlertTriangle,
   sparkle:   Sparkles,
 };
