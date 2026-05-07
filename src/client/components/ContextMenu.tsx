@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { Icon } from './Icon';
 import type { Image } from '../types';
 
+type DownloadMode = 'original' | 'compressed';
+
 export function ContextMenu({
   img,
   x,
@@ -21,7 +23,7 @@ export function ContextMenu({
   onClose: () => void;
   onOpen: (img: Image) => void;
   onCopy: (img: Image) => Promise<void>;
-  onDownload: (img: Image) => Promise<unknown>;
+  onDownload: (img: Image, mode: DownloadMode) => Promise<unknown>;
   onRename: (img: Image) => void;
   onToggleStar: (img: Image) => void;
   onTogglePublic: (img: Image) => void;
@@ -43,7 +45,7 @@ export function ContextMenu({
   }, [onClose]);
 
   const menuWidth = 210;
-  const menuHeight = 320;
+  const menuHeight = 356;
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
   const vh = typeof window !== 'undefined' ? window.innerHeight : 768;
   const left = Math.max(8, Math.min(x, vw - menuWidth - 8));
@@ -57,7 +59,8 @@ export function ContextMenu({
     { kind: 'item', label: 'Open details',                                     icon: 'image',    onClick: () => { onOpen(img); onClose(); } },
     { kind: 'divider' },
     { kind: 'item', label: 'Copy link',                                         icon: 'link2',    onClick: async () => { await onCopy(img); onClose(); } },
-    { kind: 'item', label: 'Download compressed',                               icon: 'download', onClick: async () => { await onDownload(img); onClose(); } },
+    { kind: 'item', label: 'Download original',                                 icon: 'download', onClick: async () => { await onDownload(img, 'original'); onClose(); } },
+    { kind: 'item', label: 'Download compressed',                               icon: 'download', onClick: async () => { await onDownload(img, 'compressed'); onClose(); } },
     { kind: 'item', label: 'Rename',                                            icon: 'edit',     onClick: () => { onRename(img); onClose(); } },
     { kind: 'divider' },
     { kind: 'item', label: img.isStarred ? 'Unstar' : 'Star',                  icon: 'star',     onClick: () => { onToggleStar(img); onClose(); } },

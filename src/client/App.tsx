@@ -17,8 +17,10 @@ import {
   patchImage,
   createAlbum,
 } from './lib/api';
-import { downloadCompressedImage, type DownloadResult } from './lib/download';
+import { downloadCompressedImage, downloadOriginalImage, type DownloadResult } from './lib/download';
 import type { Album, Image, NavView, SortBy, ViewMode } from './types';
+
+type DownloadMode = 'original' | 'compressed';
 
 export function App() {
   const authSWR = useSWR(
@@ -176,8 +178,8 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
     albumsSWR.mutate();
   };
 
-  const handleDownload = async (img: Image): Promise<DownloadResult> => {
-    return downloadCompressedImage(img);
+  const handleDownload = async (img: Image, mode: DownloadMode): Promise<DownloadResult> => {
+    return mode === 'compressed' ? downloadCompressedImage(img) : downloadOriginalImage(img);
   };
 
   const handleLogout = async () => {

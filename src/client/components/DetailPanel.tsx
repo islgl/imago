@@ -6,6 +6,8 @@ import { formatBytes, formatDate, makeEmbeds, extFromFilename } from '../lib/uti
 import { signImage } from '../lib/api';
 import type { DownloadResult } from '../lib/download';
 
+type DownloadMode = 'original' | 'compressed';
+
 export function DetailPanel({
   img,
   albums,
@@ -21,7 +23,7 @@ export function DetailPanel({
   onClose: () => void;
   onDelete: (img: Image) => void;
   onRename: (img: Image) => void;
-  onDownload: (img: Image) => Promise<DownloadResult>;
+  onDownload: (img: Image, mode: DownloadMode) => Promise<DownloadResult>;
   onToggleStar: (img: Image) => void;
   onTogglePublic: (img: Image) => void;
 }) {
@@ -32,7 +34,7 @@ export function DetailPanel({
   const [signing, setSigning] = useState(false);
   const [signTtl, setSignTtl] = useState(3600);
   const [copiedSigned, setCopiedSigned] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<DownloadMode | null>(null);
   const [downloadNote, setDownloadNote] = useState<string>('');
   const [downloadError, setDownloadError] = useState<string>('');
   const linkUrl = img.publicUrl ?? img.url;
@@ -61,21 +63,23 @@ export function DetailPanel({
     setTimeout(() => setCopiedSigned(false), 2000);
   };
 
-  const downloadImage = async () => {
-    setDownloading(true);
+  const downloadImage = async (mode: DownloadMode) => {
+    setDownloading(mode);
     setDownloadNote('');
     setDownloadError('');
     try {
-      const result = await onDownload(img);
+      const result = await onDownload(img, mode);
       setDownloadNote(
-        result.compressed
-          ? `${formatBytes(result.originalSize)} -> ${formatBytes(result.finalSize)}`
-          : 'Downloaded original',
+        mode === 'original'
+          ? 'Downloaded original'
+          : result.compressed
+            ? `${formatBytes(result.originalSize)} -> ${formatBytes(result.finalSize)}`
+            : 'Compressed version was not smaller; downloaded original',
       );
     } catch (e) {
       setDownloadError(e instanceof Error ? e.message : 'Download failed');
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
 
@@ -403,52 +407,59 @@ export function DetailPanel({
         style={{
           padding: '10px 12px 14px',
           borderTop: '1px solid var(--border)',
-          position: 'relative',
-          display: 'flex',
-          gap: 7,
+          display: 'grid',
+          gap: 8,
           flexShrink: 0,
         }}
       >
         {(downloadNote || downloadError) && (
           <div
             style={{
-              position: 'absolute',
-              left: 12,
-              right: 12,
-              bottom: 54,
               fontSize: 11.5,
               color: downloadError ? 'var(--danger)' : 'var(--success)',
               textAlign: 'center',
-              pointerEvents: 'none',
+              lineHeight: 1.35,
             }}
           >
             {downloadError || downloadNote}
           </div>
         )}
-        <Btn
-          variant="outline"
-          icon="download"
-          onClick={() => { void downloadImage(); }}
-          disabled={downloading}
-          title="Download compressed"
-          style={{ flex: 1, justifyContent: 'center' }}
-        >
-          {downloading ? 'Compressing' : 'Download'}
-        </Btn>
-        <Btn
-          variant="outline"
-          icon="external"
-          onClick={() => window.open(img.url, '_blank')}
-          style={{ flex: 1, justifyContent: 'center' }}
-        >
-          Preview
-        </Btn>
-        <Btn
-          variant="ghost"
-          icon="trash"
-          onClick={() => onDelete(img)}
-          style={{ color: 'var(--danger)' }}
-        />
+        <div style={{ display: 'flex', gap: 7 }}>
+          <Btn
+            variant="outline"
+            icon="download"
+            onClick={() => { void downloadImage('original'); }}
+            disabled={downloading !== null}
+            title="Download original"
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            {downloading === 'original' ? 'Downloading' : 'Original'}
+          </Btn>
+          <Btn
+            variant="outline"
+            icon="download"
+            onClick={() => { void downloadImage('compressed'); }}
+            disabled={downloading !== null}
+            title="Download compressed"
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            {downloading === 'compressed' ? 'Compressing' : 'Compressed'}
+          </Btn>
+          <Btn
+            variant="outline"
+            icon="external"
+            onClick={() => window.open(img.url, '_blank')}
+            title="Preview"
+            style={{ justifyContent: 'center', width: 38, paddingLeft: 0, paddingRight: 0 }}
+          />
+          <Btn
+            variant="ghost"
+            icon="trash"
+            onClick={() => onDelete(img)}
+            title="Delete"
+            style={{ color: 'var(--danger)', width: 34, paddingLeft: 0, paddingRight: 0 }}
+          />
+        </div>
       </div>
     </div>
   );
