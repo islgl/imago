@@ -182,6 +182,10 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
     return mode === 'compressed' ? downloadCompressedImage(img) : downloadOriginalImage(img);
   };
 
+  const handleContextDownload = async (img: Image): Promise<DownloadResult> => {
+    return handleDownload(img, 'original');
+  };
+
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     onLoggedOut();
@@ -274,7 +278,7 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
           onClose={() => setCtxMenu(null)}
           onOpen={(img) => setDetail(img)}
           onCopy={handleCopy}
-          onDownload={handleDownload}
+          onDownload={handleContextDownload}
           onRename={setRenameTarget}
           onToggleStar={handleToggleStar}
           onTogglePublic={handleTogglePublic}
