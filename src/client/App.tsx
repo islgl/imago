@@ -5,6 +5,7 @@ import { TopBar } from './components/TopBar';
 import { Gallery } from './components/Gallery';
 import { DetailPanel } from './components/DetailPanel';
 import { UploadModal } from './components/UploadModal';
+import { RenameModal } from './components/RenameModal';
 import { SettingsPanel } from './components/SettingsPanel';
 import { ContextMenu } from './components/ContextMenu';
 import { LoginScreen } from './components/LoginScreen';
@@ -16,7 +17,6 @@ import {
   patchImage,
   createAlbum,
 } from './lib/api';
-import { imageFilenameError } from './lib/utils';
 import type { Album, Image, NavView, SortBy, ViewMode } from './types';
 
 export function App() {
@@ -71,6 +71,7 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy, setSortBy] = useState<SortBy>('date');
   const [showUpload, setShowUpload] = useState(false);
+  const [renameTarget, setRenameTarget] = useState<Image | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [ctxMenu, setCtxMenu] = useState<{ img: Image; x: number; y: number } | null>(null);
 
@@ -167,23 +168,6 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
     return updated;
   };
 
-  const handlePromptRename = async (img: Image) => {
-    const next = window.prompt('Rename image', img.filename);
-    if (next === null) return;
-    const filename = next.trim();
-    const error = imageFilenameError(filename);
-    if (error) {
-      window.alert(error);
-      return;
-    }
-    if (filename === img.filename) return;
-    try {
-      await handleRename(img, filename);
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : 'Failed to rename image');
-    }
-  };
-
   const handleCreateAlbum = async () => {
     const name = window.prompt('Album name');
     if (!name || !name.trim()) return;
@@ -270,7 +254,7 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
           albums={albums}
           onClose={() => setDetail(null)}
           onDelete={handleDelete}
-          onRename={handleRename}
+          onRename={setRenameTarget}
           onToggleStar={handleToggleStar}
           onTogglePublic={handleTogglePublic}
         />
@@ -290,10 +274,17 @@ function AppInner({ onLoggedOut }: { onLoggedOut: () => void }) {
           onOpen={(img) => setDetail(img)}
           onCopy={handleCopy}
           onDownload={handleDownload}
-          onRename={handlePromptRename}
+          onRename={setRenameTarget}
           onToggleStar={handleToggleStar}
           onTogglePublic={handleTogglePublic}
           onDelete={handleDelete}
+        />
+      )}
+      {renameTarget && (
+        <RenameModal
+          img={renameTarget}
+          onClose={() => setRenameTarget(null)}
+          onRename={handleRename}
         />
       )}
     </div>

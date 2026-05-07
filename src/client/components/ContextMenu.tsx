@@ -22,7 +22,7 @@ export function ContextMenu({
   onOpen: (img: Image) => void;
   onCopy: (img: Image) => Promise<void>;
   onDownload: (img: Image) => void;
-  onRename: (img: Image) => Promise<void>;
+  onRename: (img: Image) => void;
   onToggleStar: (img: Image) => void;
   onTogglePublic: (img: Image) => void;
   onDelete: (img: Image) => void;
@@ -43,7 +43,7 @@ export function ContextMenu({
   }, [onClose]);
 
   const menuWidth = 210;
-  const menuHeight = 290;
+  const menuHeight = 320;
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
   const vh = typeof window !== 'undefined' ? window.innerHeight : 768;
   const left = Math.max(8, Math.min(x, vw - menuWidth - 8));
@@ -58,7 +58,7 @@ export function ContextMenu({
     { kind: 'divider' },
     { kind: 'item', label: 'Copy link',                                         icon: 'link2',    onClick: async () => { await onCopy(img); onClose(); } },
     { kind: 'item', label: 'Download',                                          icon: 'download', onClick: () => { onDownload(img); onClose(); } },
-    { kind: 'item', label: 'Rename',                                            icon: 'edit',     onClick: async () => { await onRename(img); onClose(); } },
+    { kind: 'item', label: 'Rename',                                            icon: 'edit',     onClick: () => { onRename(img); onClose(); } },
     { kind: 'divider' },
     { kind: 'item', label: img.isStarred ? 'Unstar' : 'Star',                  icon: 'star',     onClick: () => { onToggleStar(img); onClose(); } },
     { kind: 'item', label: img.isPublic  ? 'Make private' : 'Make public',     icon: img.isPublic ? 'lock' : 'globe', onClick: () => { onTogglePublic(img); onClose(); } },

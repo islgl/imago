@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Icon } from './Icon';
 import { Btn } from './Btn';
 import type { Album, Image } from '../types';
-import { formatBytes, formatDate, imageFilenameError, makeEmbeds, extFromFilename } from '../lib/utils';
+import { formatBytes, formatDate, makeEmbeds, extFromFilename } from '../lib/utils';
 import { signImage } from '../lib/api';
 
 export function DetailPanel({
@@ -18,7 +18,7 @@ export function DetailPanel({
   albums: Album[];
   onClose: () => void;
   onDelete: (img: Image) => void;
-  onRename: (img: Image, filename: string) => Promise<Image>;
+  onRename: (img: Image) => void;
   onToggleStar: (img: Image) => void;
   onTogglePublic: (img: Image) => void;
 }) {
@@ -29,17 +29,7 @@ export function DetailPanel({
   const [signing, setSigning] = useState(false);
   const [signTtl, setSignTtl] = useState(3600);
   const [copiedSigned, setCopiedSigned] = useState(false);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState(img.filename);
-  const [renameError, setRenameError] = useState<string | null>(null);
-  const [renameSaving, setRenameSaving] = useState(false);
   const linkUrl = img.publicUrl ?? img.url;
-
-  useEffect(() => {
-    setRenameValue(img.filename);
-    setRenameError(null);
-    setIsRenaming(false);
-  }, [img.id, img.filename]);
 
   const copyLink = async () => {
     await navigator.clipboard.writeText(linkUrl);
@@ -63,42 +53,6 @@ export function DetailPanel({
     await navigator.clipboard.writeText(signedUrl);
     setCopiedSigned(true);
     setTimeout(() => setCopiedSigned(false), 2000);
-  };
-
-  const startRename = () => {
-    setRenameValue(img.filename);
-    setRenameError(null);
-    setIsRenaming(true);
-  };
-
-  const cancelRename = () => {
-    setRenameValue(img.filename);
-    setRenameError(null);
-    setIsRenaming(false);
-  };
-
-  const saveRename = async () => {
-    const filename = renameValue.trim();
-    const error = imageFilenameError(filename);
-    if (error) {
-      setRenameError(error);
-      return;
-    }
-    if (filename === img.filename) {
-      setIsRenaming(false);
-      return;
-    }
-
-    setRenameSaving(true);
-    setRenameError(null);
-    try {
-      await onRename(img, filename);
-      setIsRenaming(false);
-    } catch (err) {
-      setRenameError(err instanceof Error ? err.message : 'Failed to rename image');
-    } finally {
-      setRenameSaving(false);
-    }
   };
 
   const albumName = albums.find((a) => a.id === img.albumId)?.name ?? '—';
@@ -190,77 +144,22 @@ export function DetailPanel({
         {tab === 'info' && (
           <div style={{ padding: 16 }}>
             <div style={{ marginBottom: 14 }}>
-              {isRenaming ? (
-                <div>
-                  <input
-                    value={renameValue}
-                    autoFocus
-                    onChange={(e) => {
-                      setRenameValue(e.target.value);
-                      if (renameError) setRenameError(null);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') void saveRename();
-                      if (e.key === 'Escape') cancelRename();
-                    }}
-                    style={{
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      padding: '8px 10px',
-                      border: '1px solid var(--border-mid)',
-                      borderRadius: 'var(--r-sm)',
-                      background: 'var(--bg)',
-                      color: 'var(--text-1)',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'inherit',
-                      outline: 'none',
-                      letterSpacing: '-0.01em',
-                    }}
-                  />
-                  {renameError && (
-                    <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 6, lineHeight: 1.4 }}>
-                      {renameError}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', gap: 7, marginTop: 8 }}>
-                    <Btn
-                      variant="accent"
-                      size="sm"
-                      icon="check"
-                      disabled={renameSaving}
-                      onClick={() => void saveRename()}
-                    >
-                      {renameSaving ? 'Saving…' : 'Save'}
-                    </Btn>
-                    <Btn
-                      variant="outline"
-                      size="sm"
-                      disabled={renameSaving}
-                      onClick={cancelRename}
-                    >
-                      Cancel
-                    </Btn>
-                  </div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    wordBreak: 'break-all',
+                    lineHeight: 1.5,
+                    letterSpacing: '-0.01em',
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  {img.filename}
                 </div>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      wordBreak: 'break-all',
-                      lineHeight: 1.5,
-                      letterSpacing: '-0.01em',
-                      flex: 1,
-                      minWidth: 0,
-                    }}
-                  >
-                    {img.filename}
-                  </div>
-                  <IconBtn icon="edit" title="Rename" onClick={startRename} />
-                </div>
-              )}
+                <IconBtn icon="edit" title="Rename" onClick={() => onRename(img)} />
+              </div>
               <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 3 }}>
                 Uploaded {formatDate(img.createdAt)}
               </div>
